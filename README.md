@@ -17,7 +17,7 @@ Aplicación Spring Boot para gestionar actividades de un grupo scout.
 # Pruebas
 
 - .\mvnw.cmd clean test
-- .\mvnw.cmd spring-boot:run
+- .\mvnw.cmd spring-boot:run //correr la app carga tablas etc 
 
 ## Requisitos previos
 
