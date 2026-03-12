@@ -1,33 +1,49 @@
 package com.scout.scoutmanagement.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-
-import java.time.Duration;
-import java.util.List;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "actividades")
+@Getter
+@Setter
 public class Actividad {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     @ManyToOne
-    Educador educadorResponsable;
+    @JoinColumn(name = "educador_id", nullable = false)
+    private Persona educadorResponsable;
 
     @ManyToOne
-    Beneficiario beneficiarioACargo;
+    @JoinColumn(name = "beneficiario_id", nullable = false)
+    private Persona beneficiarioACargo;
 
-    String titulo;
-    String materiales; //quizas solo string
-    String desarrollo;
-    String objetivo;
-    String recupero;
-    Duration duracion;
+    private String titulo;
+    private String materiales;
+    private String desarrollo;
+    private String objetivo;
+    private String recupero;
+
+    @Column(name = "duracion_minutos")
+    private Long duracionMinutos;
+
+    public Actividad() {
+    }
+
+    public Actividad(String titulo, String objetivo, String desarrollo, String materiales,
+                     String recupero, Long duracionMinutos, Persona educadorResponsable,
+                     Persona beneficiarioACargo) {
+        this.titulo = titulo;
+        this.objetivo = objetivo;
+        this.desarrollo = desarrollo;
+        this.materiales = materiales;
+        this.recupero = recupero;
+        this.duracionMinutos = duracionMinutos;
+        this.educadorResponsable = educadorResponsable;
+        this.beneficiarioACargo = beneficiarioACargo;
+    }
 }

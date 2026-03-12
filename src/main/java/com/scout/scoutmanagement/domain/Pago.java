@@ -17,7 +17,7 @@ public class Pago {
     Long id;
 
     @ManyToOne
-    Beneficiario beneficiario;
+    Persona persona;
 
     @Enumerated(EnumType.STRING)
     Motivo motivo;
@@ -25,9 +25,9 @@ public class Pago {
     double monto;
     LocalDate fecha;
 
-    public Pago(Long id, Beneficiario beneficiario, double monto, Motivo motivo, LocalDate fecha) {
+    public Pago(Long id, Persona persona, double monto, Motivo motivo, LocalDate fecha) {
         this.id = id;
-        this.beneficiario = beneficiario;
+        this.persona = persona;
         this.monto = monto;
         this.motivo = motivo;
         this.fecha = fecha;

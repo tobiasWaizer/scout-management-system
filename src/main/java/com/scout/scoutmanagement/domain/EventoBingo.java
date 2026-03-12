@@ -5,11 +5,11 @@ import java.util.List;
 
 
 public class EventoBingo extends Evento {
-    List<Educador> cocineros;
-    List<Educador> cartoneros; //quizas haga falta crear una clase generica para las personas
-    List<Educador> bacha;
+    List<Persona> cocineros;
+    List<Persona> cartoneros; //quizas haga falta crear una clase generica para las personas
+    List<Persona> bacha;
 
-     public EventoBingo(Long id, String nombre, String descripcion, LocalDate fechaInicio, LocalDate fechaFin, List<Educador> cocineros, List<Educador> cartoneros, List<Educador> bacha) {
+     public EventoBingo(Long id, String nombre, String descripcion, LocalDate fechaInicio, LocalDate fechaFin, List<Persona> cocineros, List<Persona> cartoneros, List<Persona> bacha) {
         super(id, nombre, descripcion, fechaInicio, fechaFin);
         this.cocineros = cocineros;
         this.cartoneros = cartoneros;

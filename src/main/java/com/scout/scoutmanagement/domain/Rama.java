@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Setter
 @Getter
 @Entity
@@ -21,7 +19,7 @@ public class Rama {
 
     @OneToOne
     @JoinColumn(name = "jefe_de_rama_id")
-    private Educador jefeDeRama;
+    private Persona jefeDeRama;
 
     public Rama() {
     }
@@ -29,7 +27,5 @@ public class Rama {
     public Rama(String nombre) {
         this.nombre = nombre;
     }
-
-
 }
 

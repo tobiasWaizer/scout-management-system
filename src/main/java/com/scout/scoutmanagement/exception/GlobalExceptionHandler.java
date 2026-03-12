@@ -13,6 +13,14 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(ObjectNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleObjectNotFoundException(ObjectNotFoundException ex) {
+        Map<String, Object> respuesta = new HashMap<>();
+        respuesta.put("mensaje", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(respuesta);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationException(MethodArgumentNotValidException ex) {
         List<String> errores = ex.getBindingResult().getFieldErrors().stream()
