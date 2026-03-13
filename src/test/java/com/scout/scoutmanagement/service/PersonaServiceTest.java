@@ -29,6 +29,9 @@ class PersonaServiceTest {
     @Mock
     private RamaRepository ramaRepository;
 
+    @Mock
+    private CostosFijosAutomaticosService costosFijosAutomaticosService;
+
     @InjectMocks
     private PersonaService personaService;
 
@@ -88,4 +91,3 @@ class PersonaServiceTest {
         assertEquals("No existe un beneficiario con ID: 7", ex.getMessage());
     }
 }
-

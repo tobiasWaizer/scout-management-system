@@ -2,6 +2,7 @@ package com.scout.scoutmanagement.domain;
 
 public enum Rol {
     EDUCADOR,
-    BENEFICIARIO
+    BENEFICIARIO,
+    ADMINISTRADOR
 }
 

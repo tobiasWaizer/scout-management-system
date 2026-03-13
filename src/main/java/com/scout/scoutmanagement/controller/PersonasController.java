@@ -88,3 +88,8 @@ public class PersonasController {
     }
 }
 
+//TODO: vamos a ponernos a investigar un poco sobre como se gestionan los pagos en un sistema comun,
+// como se registran si se tienen que realizar pagos cada cierta frecuencia,
+// solicitar por mail cada x dia del mes que se pague la cuota mensual,
+// tmbn la afiliacion, pensar como mostrar los datos de los pagos, como se pagan los campamentos,
+// como se guardan las fotos de papeles en nuestro sistema etc..., que hacer si se quieren pagar varias cuotas juntas,

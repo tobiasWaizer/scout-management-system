@@ -9,15 +9,23 @@ import com.scout.scoutmanagement.repository.PersonaRepository;
 import com.scout.scoutmanagement.repository.RamaRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.YearMonth;
+
 @Service
 public class PersonaService {
 
     private final PersonaRepository personaRepository;
     private final RamaRepository ramaRepository;
+    private final CostosFijosAutomaticosService costosFijosAutomaticosService;
 
-    public PersonaService(PersonaRepository personaRepository, RamaRepository ramaRepository) {
+    public PersonaService(
+        PersonaRepository personaRepository,
+        RamaRepository ramaRepository,
+        CostosFijosAutomaticosService costosFijosAutomaticosService
+    ) {
         this.personaRepository = personaRepository;
         this.ramaRepository = ramaRepository;
+        this.costosFijosAutomaticosService = costosFijosAutomaticosService;
     }
 
     public Persona crearPersona(PersonaDTO personaDTO) {
@@ -33,7 +41,16 @@ public class PersonaService {
             personaDTO.getRol()
         );
 
-        return personaRepository.save(persona);
+        //potencial observer, si se quiere desacoplar la logica de costos fijos automaticos del servicio de personas, se podria implementar un evento de "PersonaCreada" y que el servicio de costos fijos automaticos escuche ese evento para generar los costos fijos correspondientes
+        Persona personaGuardada = personaRepository.save(persona);
+        YearMonth periodoActual = YearMonth.now();
+        costosFijosAutomaticosService.generarDesdeMesHastaFinDeAnioParaPersona(
+            personaGuardada,
+            periodoActual.getYear(),
+            periodoActual.getMonthValue()
+        );
+
+        return personaGuardada;
     }
 
     public Persona modificarPersona(PersonaDTO personaDTO, Long idPersona) {

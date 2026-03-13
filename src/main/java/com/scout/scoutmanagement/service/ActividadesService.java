@@ -9,7 +9,6 @@ import com.scout.scoutmanagement.repository.ActividadRepository;
 import com.scout.scoutmanagement.repository.PersonaRepository;
 import org.springframework.stereotype.Service;
 
-
 @Service
 public class ActividadesService {
 
