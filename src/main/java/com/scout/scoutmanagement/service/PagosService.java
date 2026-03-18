@@ -1,7 +1,7 @@
 package com.scout.scoutmanagement.service;
 
 import com.scout.scoutmanagement.DTO.PagoDTO;
-import com.scout.scoutmanagement.domain.Pagos.Costos;
+import com.scout.scoutmanagement.domain.Pagos.Cuota;
 import com.scout.scoutmanagement.domain.Pagos.Pago;
 import com.scout.scoutmanagement.domain.Persona;
 import com.scout.scoutmanagement.exception.ObjectNotFoundException;
@@ -33,35 +33,35 @@ public class PagosService {
 
     @Transactional
     public Pago generarPago(PagoDTO pagoDTO) {
-        validarIdsDeCostosSinRepetidos(pagoDTO.getCostoIds());
+        validarIdsDeCuotasSinRepetidos(pagoDTO.getCuotaIds());
 
         Persona personaQuePaga = personaService.obtenerPersona(pagoDTO.getPersonaId());
         Persona personaQueRegistra = personaService.obtenerPersona(pagoDTO.getPersonaQueRegistraId());
         //validarPersonasActivas(personaQuePaga, personaQueRegistra); quizas en un futuro lo activo pero no de momento
 
-        List<Costos> costos = costosService.obtenerCostosPorIds(pagoDTO.getCostoIds());
-        validarQueTodosLosCostosExistan(pagoDTO.getCostoIds(), costos);
-        validarCostosCorrespondanALaPersona(costos, personaQuePaga.getId());
-        validarCostosNoPagados(costos);
+        List<Cuota> cuotas = costosService.obtenerCuotasPorIds(pagoDTO.getCuotaIds());
+        validarQueTodasLasCuotasExistan(pagoDTO.getCuotaIds(), cuotas);
+        validarCuotasCorrespondanALaPersona(cuotas, personaQuePaga.getId());
+        validarCuotasNoPagadas(cuotas);
 
 
         Pago pago = new Pago();
         pago.setPersona(personaQuePaga);
         pago.setPersonaQueRegistra(personaQueRegistra);
         pago.setFecha(pagoDTO.getFecha() != null ? pagoDTO.getFecha() : LocalDate.now());
-        pago.setCostos(costos);
+        pago.setCuotas(cuotas);
 
         Pago pagoARetornar = pagoRepository.save(pago);
-        costosService.marcarComoPagado(costos, pagoARetornar);
+        costosService.marcarCuotasComoPagadas(cuotas, pagoARetornar);
 
 
         return pagoARetornar;
     }
 
-    private void validarIdsDeCostosSinRepetidos(List<Long> costoIds) {
-        Set<Long> idsSinRepetir = new HashSet<>(costoIds);
-        if (idsSinRepetir.size() != costoIds.size()) {
-            throw new IllegalArgumentException("No se permiten IDs de costos repetidos en el mismo pago");
+    private void validarIdsDeCuotasSinRepetidos(List<Long> cuotaIds) {
+        Set<Long> idsSinRepetir = new HashSet<>(cuotaIds);
+        if (idsSinRepetir.size() != cuotaIds.size()) {
+            throw new IllegalArgumentException("No se permiten IDs de cuotas repetidos en el mismo pago");
         }
     }
 
@@ -74,27 +74,27 @@ public class PagosService {
         }
     }
 
-    private void validarQueTodosLosCostosExistan(List<Long> costoIdsSolicitados, List<Costos> costosEncontrados) {
-        if (costosEncontrados.size() != costoIdsSolicitados.size()) {
-            throw new ObjectNotFoundException("Uno o mas costos enviados no existen");
+    private void validarQueTodasLasCuotasExistan(List<Long> cuotaIdsSolicitadas, List<Cuota> cuotasEncontradas) {
+        if (cuotasEncontradas.size() != cuotaIdsSolicitadas.size()) {
+            throw new ObjectNotFoundException("Una o mas cuotas enviadas no existen");
         }
     }
 
-    private void validarCostosCorrespondanALaPersona(List<Costos> costos, Long personaId) {
-        boolean hayCostoDeOtraPersona = costos.stream()
-            .anyMatch(costo -> !costo.getPersonaQueTieneQuePagar().getId().equals(personaId));
+    private void validarCuotasCorrespondanALaPersona(List<Cuota> cuotas, Long personaId) {
+        boolean hayCuotaDeOtraPersona = cuotas.stream()
+            .anyMatch(cuota -> !cuota.getCosto().getPersonaQueTieneQuePagar().getId().equals(personaId));
 
-        if (hayCostoDeOtraPersona) {
-            throw new IllegalArgumentException("Todos los costos deben pertenecer a la persona que paga");
+        if (hayCuotaDeOtraPersona) {
+            throw new IllegalArgumentException("Todas las cuotas deben pertenecer a la persona que paga");
         }
     }
 
-    private void validarCostosNoPagados(List<Costos> costos) {
-        costos.stream()
-            .filter(costo -> costo.getCuotas().stream().anyMatch(cuota -> cuota.getPago() != null))
+    private void validarCuotasNoPagadas(List<Cuota> cuotas) {
+        cuotas.stream()
+            .filter(cuota -> cuota.getPago() != null)
             .findFirst()
-            .ifPresent(costo -> {
-                throw new IllegalArgumentException("El costo con ID " + costo.getId() + " ya fue pagado");
+            .ifPresent(cuota -> {
+                throw new IllegalArgumentException("La cuota con ID " + cuota.getId() + " ya fue pagada");
             });
     }
 }

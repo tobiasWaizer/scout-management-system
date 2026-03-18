@@ -21,9 +21,9 @@ public class PagoDTO {
     @Positive(message = "El ID de la persona que registra el pago debe ser positivo")
     private Long personaQueRegistraId;
 
-    @NotEmpty(message = "Debe enviar al menos un costo a pagar")
-    private List<@NotNull(message = "Cada costo debe tener ID")
-            @Positive(message = "Cada ID de costo debe ser positivo") Long> costoIds;
+    @NotEmpty(message = "Debe enviar al menos una cuota a pagar")
+    private List<@NotNull(message = "Cada cuota debe tener ID")
+            @Positive(message = "Cada ID de cuota debe ser positivo") Long> cuotaIds;
 
     private LocalDate fecha;
 

@@ -1,7 +1,7 @@
 package com.scout.scoutmanagement.controller;
 
 import com.scout.scoutmanagement.DTO.PagoDTO;
-import com.scout.scoutmanagement.domain.Pagos.Costos;
+import com.scout.scoutmanagement.domain.Pagos.Cuota;
 import com.scout.scoutmanagement.domain.Pagos.Pago;
 import com.scout.scoutmanagement.service.PagosService;
 import jakarta.validation.Valid;
@@ -41,17 +41,19 @@ public class PagosController {
         respuesta.put("personaId", pagoCreado.getPersona().getId());
         respuesta.put("personaQueRegistraId", pagoCreado.getPersonaQueRegistra().getId());
         respuesta.put("montoTotal", pagoCreado.getMontoTotal());
-        respuesta.put("costos", construirCostosEnRespuesta(pagoCreado.getCostos()));
+        respuesta.put("cuotasPagadas", construirCuotasEnRespuesta(pagoCreado.getCuotas()));
         return respuesta;
     }
 
-    private List<Map<String, Object>> construirCostosEnRespuesta(List<Costos> costos) {
-        return costos.stream().map(costo -> {
-            Map<String, Object> costoMap = new LinkedHashMap<>();
-            costoMap.put("id", costo.getId());
-            costoMap.put("tipo", costo.getClass().getSimpleName());
-            costoMap.put("importe", costo.getImporte());
-            return costoMap;
+    private List<Map<String, Object>> construirCuotasEnRespuesta(List<Cuota> cuotas) {
+        return cuotas.stream().map(cuota -> {
+            Map<String, Object> cuotaMap = new LinkedHashMap<>();
+            cuotaMap.put("id", cuota.getId());
+            cuotaMap.put("ordenCuota", cuota.getOrdenCuota());
+            cuotaMap.put("monto", cuota.getMonto());
+            cuotaMap.put("costoId", cuota.getCosto().getId());
+            cuotaMap.put("motivo", cuota.getCosto().getMotivo());
+            return cuotaMap;
         }).toList();
     }
 }

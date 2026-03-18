@@ -24,6 +24,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,11 +43,11 @@ class PagosServiceTest {
     private PagosService pagosService;
 
     @Test
-    void generarPago_deberiaGuardarPagoConVariosCostos() {
+    void generarPago_deberiaGuardarPagoConVariasCuotas() {
         PagoDTO dto = new PagoDTO();
         dto.setPersonaId(1L);
         dto.setPersonaQueRegistraId(2L);
-        dto.setCostoIds(List.of(100L, 101L));
+        dto.setCuotaIds(List.of(1000L, 1001L));
         dto.setFecha(LocalDate.of(2026, 3, 17));
 
         Persona personaQuePaga = new Persona();
@@ -59,10 +60,14 @@ class PagosServiceTest {
 
         Costos costo1 = crearCosto(100L, personaQuePaga, "1000");
         Costos costo2 = crearCosto(101L, personaQuePaga, "2500");
+        Cuota cuota1 = costo1.getCuotas().get(0);
+        cuota1.setId(1000L);
+        Cuota cuota2 = costo2.getCuotas().get(0);
+        cuota2.setId(1001L);
 
         when(personaService.obtenerPersona(1L)).thenReturn(personaQuePaga);
         when(personaService.obtenerPersona(2L)).thenReturn(personaQueRegistra);
-        when(costosService.obtenerCostosPorIds(dto.getCostoIds())).thenReturn(List.of(costo1, costo2));
+        when(costosService.obtenerCuotasPorIds(dto.getCuotaIds())).thenReturn(List.of(cuota1, cuota2));
         when(pagoRepository.save(any(Pago.class))).thenAnswer(invocation -> {
             Pago pago = invocation.getArgument(0);
             java.lang.reflect.Field idField = Pago.class.getDeclaredField("id");
@@ -80,14 +85,15 @@ class PagosServiceTest {
         assertEquals(2, resultado.getCostos().size());
         assertEquals(77L, costo1.getCuotas().get(0).getPago().getId());
         assertEquals(77L, costo2.getCuotas().get(0).getPago().getId());
+        verify(costosService).marcarCuotasComoPagadas(List.of(cuota1, cuota2), resultado);
     }
 
     @Test
-    void generarPago_deberiaFallarSiAlgunoDeLosCostosYaFuePagado() {
+    void generarPago_deberiaFallarSiAlgunaCuotaYaFuePagada() {
         PagoDTO dto = new PagoDTO();
         dto.setPersonaId(1L);
         dto.setPersonaQueRegistraId(2L);
-        dto.setCostoIds(List.of(100L));
+        dto.setCuotaIds(List.of(1000L));
 
         Persona personaQuePaga = new Persona();
         personaQuePaga.setId(1L);
@@ -98,15 +104,29 @@ class PagosServiceTest {
         personaQueRegistra.setActivo(true);
 
         Costos costoYaPagado = crearCosto(100L, personaQuePaga, "1000");
-        costoYaPagado.getCuotas().get(0).setPago(new Pago());
+        Cuota cuotaYaPagada = costoYaPagado.getCuotas().get(0);
+        cuotaYaPagada.setId(1000L);
+        cuotaYaPagada.setPago(new Pago());
 
         when(personaService.obtenerPersona(1L)).thenReturn(personaQuePaga);
         when(personaService.obtenerPersona(2L)).thenReturn(personaQueRegistra);
-        when(costosService.obtenerCostosPorIds(dto.getCostoIds())).thenReturn(List.of(costoYaPagado));
+        when(costosService.obtenerCuotasPorIds(dto.getCuotaIds())).thenReturn(List.of(cuotaYaPagada));
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> pagosService.generarPago(dto));
 
-        assertEquals("El costo con ID 100 ya fue pagado", ex.getMessage());
+        assertEquals("La cuota con ID 1000 ya fue pagada", ex.getMessage());
+    }
+
+    @Test
+    void generarPago_deberiaFallarSiHayCuotasRepetidasEnElMismoPago() {
+        PagoDTO dto = new PagoDTO();
+        dto.setPersonaId(1L);
+        dto.setPersonaQueRegistraId(2L);
+        dto.setCuotaIds(List.of(1000L, 1000L));
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> pagosService.generarPago(dto));
+
+        assertEquals("No se permiten IDs de cuotas repetidos en el mismo pago", ex.getMessage());
     }
 
     private Costos crearCosto(Long id, Persona personaObjetivo, String importe) {

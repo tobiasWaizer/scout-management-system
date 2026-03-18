@@ -9,6 +9,7 @@ import com.scout.scoutmanagement.domain.Pagos.Pago;
 import com.scout.scoutmanagement.domain.Persona;
 import com.scout.scoutmanagement.repository.CostosRepository;
 import com.scout.scoutmanagement.repository.CostosVariablesRepository;
+import com.scout.scoutmanagement.repository.CuotaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,21 +25,29 @@ public class CostosService {
 
     private final CostosVariablesRepository costosVariablesRepository;
     private final CostosRepository costosRepository;
+    private final CuotaRepository cuotaRepository;
     private final PersonaService personaService;
 
     public CostosService(
         CostosVariablesRepository costosVariablesRepository,
         CostosRepository costosRepository,
+        CuotaRepository cuotaRepository,
         PersonaService personaService
     ) {
         this.costosVariablesRepository = costosVariablesRepository;
         this.costosRepository = costosRepository;
+        this.cuotaRepository = cuotaRepository;
         this.personaService = personaService;
     }
 
     @Transactional(readOnly = true)
     public List<Costos> obtenerCostosPorIds(List<Long> costoIds) {
         return costosRepository.findAllById(costoIds);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Cuota> obtenerCuotasPorIds(List<Long> cuotaIds) {
+        return cuotaRepository.findAllById(cuotaIds);
     }
 
     @Transactional
@@ -52,6 +61,19 @@ public class CostosService {
 
         costos.forEach(costo -> asociarPago(costo, pago));
         costosRepository.saveAll(costos);
+    }
+
+    @Transactional
+    public void marcarCuotasComoPagadas(List<Cuota> cuotas, Pago pago) {
+        if (cuotas == null || cuotas.isEmpty()) {
+            throw new IllegalArgumentException("Debes enviar al menos una cuota para marcar como pagada");
+        }
+        if (pago == null || pago.getId() == null) {
+            throw new IllegalArgumentException("El pago debe existir antes de asociarlo a las cuotas");
+        }
+
+        cuotas.forEach(cuota -> cuota.setPago(pago));
+        cuotaRepository.saveAll(cuotas);
     }
 
     private void asociarPago(Costos costo, Pago pago) {
