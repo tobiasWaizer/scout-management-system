@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Entity
@@ -35,9 +36,8 @@ public class Pago {
     @JoinColumn(name = "persona_que_registra_id", nullable = false)
     private Persona personaQueRegistra;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "pago_id")
-    private List<Costos> costos = new ArrayList<>();
+    @OneToMany(mappedBy = "pago", cascade = CascadeType.ALL)
+    private List<Cuota> cuotas = new ArrayList<>();
 
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal montoTotal = BigDecimal.ZERO;
@@ -58,19 +58,47 @@ public class Pago {
 
     }
 
-    public void addCosto(Costos costo) {
-        this.costos.add(costo);
+    public void addCuota(Cuota cuota) {
+        cuota.setPago(this);
+        this.cuotas.add(cuota);
         recalcularMontoTotal();
     }
 
     public void recalcularMontoTotal() {
-        this.montoTotal = this.costos.stream()
-                .map(Costos::getImporte)
+        this.montoTotal = this.cuotas.stream()
+                .map(Cuota::getMonto)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    public void setCuotas(List<Cuota> cuotas) {
+        this.cuotas = cuotas != null ? cuotas : new ArrayList<>();
+        this.cuotas.forEach(cuota -> cuota.setPago(this));
+        recalcularMontoTotal();
+    }
+
     public void setCostos(List<Costos> costos) {
-        this.costos = costos != null ? costos : new ArrayList<>();
+        List<Cuota> cuotasDesdeCostos = costos == null
+            ? new ArrayList<>()
+            : costos.stream()
+                .flatMap(costo -> costo.getCuotas().stream())
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        setCuotas(cuotasDesdeCostos);
+    }
+
+    public List<Costos> getCostos() {
+        return cuotas.stream()
+            .map(Cuota::getCosto)
+            .distinct()
+            .collect(Collectors.toList());
+    }
+
+    public int getCantidadCuotasPagadas() {
+        return cuotas.size();
+    }
+
+    public void clearCuotas() {
+        this.cuotas.clear();
         recalcularMontoTotal();
     }
 

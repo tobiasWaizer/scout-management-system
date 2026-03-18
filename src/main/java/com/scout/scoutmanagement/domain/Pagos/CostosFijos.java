@@ -14,4 +14,7 @@ public class CostosFijos extends Costos {
     @Column(name = "anio")
     private Integer anio;
 
+    @Column(name = "cantidad_meses")
+    private Integer cantidadMeses;
+
 }

@@ -1,4 +1,4 @@
-package com.scout.scoutmanagement.domain;
+package com.scout.scoutmanagement.domain.Pagos;
 
 
 public enum Motivo {

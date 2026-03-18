@@ -10,6 +10,7 @@ import com.scout.scoutmanagement.repository.RamaRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.YearMonth;
+import java.util.List;
 
 @Service
 public class PersonaService {
@@ -77,6 +78,10 @@ public class PersonaService {
         Persona persona = obtenerPersona(idPersona);
         persona.setActivo(false);
         return personaRepository.save(persona);
+    }
+
+    public List<Persona> obtenerPersonasActivas() {
+        return personaRepository.findByActivoTrue();
     }
 
     public Persona realizarPartida(Long idBeneficiario, Long rama_id) {
