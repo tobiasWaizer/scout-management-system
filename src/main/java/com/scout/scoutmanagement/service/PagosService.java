@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.Year;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -96,5 +97,14 @@ public class PagosService {
             .ifPresent(cuota -> {
                 throw new IllegalArgumentException("La cuota con ID " + cuota.getId() + " ya fue pagada");
             });
+    }
+
+    public List<Pago> obtenerPagosDePersonaId(Long idPersona) {
+        return obtenerPagosDePersonaId(idPersona, Year.now().getValue());
+    }
+
+    public List<Pago> obtenerPagosDePersonaId(Long idPersona, Integer anio) {
+        personaService.obtenerPersona(idPersona);
+        return pagoRepository.obtenerPagosDePersonaDesdeAnioOrdenadasPorFecha(idPersona, anio);
     }
 }

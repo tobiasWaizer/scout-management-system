@@ -1,37 +1,43 @@
 package com.scout.scoutmanagement.service;
 
 import com.scout.scoutmanagement.DTO.PersonaDTO;
+import com.scout.scoutmanagement.domain.Pagos.Cuota;
 import com.scout.scoutmanagement.domain.Persona;
 import com.scout.scoutmanagement.domain.Rama;
 import com.scout.scoutmanagement.domain.Rol;
 import com.scout.scoutmanagement.exception.ObjectNotFoundException;
 import com.scout.scoutmanagement.repository.PersonaRepository;
-import com.scout.scoutmanagement.repository.RamaRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.Year;
 import java.time.YearMonth;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class PersonaService {
 
     private final PersonaRepository personaRepository;
-    private final RamaRepository ramaRepository;
+    private final RamaService ramaService;
+    private final CuotaService cuotaService;
     private final CostosFijosAutomaticosService costosFijosAutomaticosService;
 
     public PersonaService(
         PersonaRepository personaRepository,
-        RamaRepository ramaRepository,
-        CostosFijosAutomaticosService costosFijosAutomaticosService
-    ) {
+        RamaService ramaService,
+        CuotaService cuotaService,
+        CostosFijosAutomaticosService costosFijosAutomaticosService) {
         this.personaRepository = personaRepository;
-        this.ramaRepository = ramaRepository;
+        this.ramaService = ramaService;
+        this.cuotaService = cuotaService;
         this.costosFijosAutomaticosService = costosFijosAutomaticosService;
     }
 
     public Persona crearPersona(PersonaDTO personaDTO) {
         validarDniYMailUnicos(personaDTO.getDni(), personaDTO.getMail());
-        Rama rama = obtenerRamaExistente(personaDTO.getRamaId());
+        Rama rama = ramaService.obtenerRamaPorId(personaDTO.getRamaId());
 
         Persona persona = new Persona(
             personaDTO.getNombre(),
@@ -56,7 +62,7 @@ public class PersonaService {
 
     public Persona modificarPersona(PersonaDTO personaDTO, Long idPersona) {
         Persona persona = obtenerPersona(idPersona);
-        Rama rama = obtenerRamaExistente(personaDTO.getRamaId());
+        Rama rama = ramaService.obtenerRamaPorId(personaDTO.getRamaId());
         validarDniYMailUnicosEnActualizacion(personaDTO.getDni(), personaDTO.getMail(), idPersona);
 
         persona.setNombre(personaDTO.getNombre());
@@ -84,13 +90,35 @@ public class PersonaService {
         return personaRepository.findByActivoTrue();
     }
 
+    public Persona obtenerEducador(Long idEducador) {
+        if (idEducador == null) {
+            throw new IllegalArgumentException("El ID del educador es obligatorio");
+        }
+        return personaRepository.findByIdAndRol(idEducador, Rol.EDUCADOR)
+            .orElseThrow(() -> new ObjectNotFoundException("No existe un educador con ID: " + idEducador));
+    }
+
+    public List<Persona> obtenerPersonasPorIds(List<Long> ids, String campo) {
+        if (ids == null || ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Set<Long> idsUnicos = new LinkedHashSet<>(ids);
+        List<Persona> personas = personaRepository.findAllById(idsUnicos);
+
+        if (personas.size() != idsUnicos.size()) {
+            throw new ObjectNotFoundException("Al menos una persona enviada en " + campo + " no existe");
+        }
+
+        return personas;
+    }
+
     public Persona realizarPartida(Long idBeneficiario, Long rama_id) {
         Persona persona = personaRepository.findByIdAndRol(idBeneficiario, Rol.BENEFICIARIO)
                 .orElseThrow(() -> new ObjectNotFoundException("No existe un beneficiario con ID: " + idBeneficiario));
 
         persona.hacerPartida();
-        Rama ramaDestino = ramaRepository.findById(rama_id)
-                .orElseThrow(() -> new ObjectNotFoundException("No existe una rama con ID: " + rama_id));
+        Rama ramaDestino = ramaService.obtenerRamaPorId(rama_id);
         persona.setRama(ramaDestino);
         return personaRepository.save(persona);
     }
@@ -99,22 +127,35 @@ public class PersonaService {
         Persona jefe = personaRepository.findByIdAndRol(idEducador, Rol.EDUCADOR)
             .orElseThrow(() -> new ObjectNotFoundException("No existe un educador con ID: " + idEducador));
 
-        Rama ramaDelEducador = obtenerRamaExistente(jefe.getRama().getId());
+        if (jefe.getRama() == null) {
+            throw new IllegalArgumentException("El educador con ID " + idEducador + " no tiene rama asignada");
+        }
+        Rama ramaDelEducador = ramaService.obtenerRamaPorId(jefe.getRama().getId());
 
-        ramaRepository.findByJefeDeRama_Id(idEducador)
+        ramaService.obtenerRamaDondeEsJefe(idEducador)
             .filter(rama -> !rama.getId().equals(ramaDelEducador.getId()))
             .ifPresent(rama -> {
                 throw new IllegalArgumentException("La persona ya es jefe de la rama " + rama.getNombre());
             });
 
         ramaDelEducador.setJefeDeRama(jefe);
-        return ramaRepository.save(ramaDelEducador);
+        return ramaService.guardar(ramaDelEducador);
     }
 
-    private Rama obtenerRamaExistente(Long ramaId) {
-        return ramaRepository.findById(ramaId)
-            .orElseThrow(() -> new ObjectNotFoundException("La rama con ID " + ramaId + " no existe"));
+    public List<Cuota> obtenerCuotasDePersona(Long idPersona, boolean pendiente, boolean activo) {
+        return obtenerCuotasDePersona(idPersona, pendiente, activo, Year.now().getValue());
     }
+
+    public List<Cuota> obtenerCuotasDePersona(Long idPersona, boolean pendiente, boolean activo, Integer anio) {
+        Persona persona = obtenerPersona(idPersona);
+
+        if (activo && !Boolean.TRUE.equals(persona.getActivo())) {
+            return List.of();
+        }
+
+        return cuotaService.obtenerCuotasDePersonaOrdenadasPorCosto(idPersona, pendiente, anio);
+    }
+
 
     private void validarDniYMailUnicos(Long dni, String mail) {
         if (personaRepository.findByDni(dni).isPresent()) {
@@ -139,4 +180,5 @@ public class PersonaService {
                 throw new IllegalArgumentException("Ya existe una persona con el email: " + mail);
             });
     }
+
 }

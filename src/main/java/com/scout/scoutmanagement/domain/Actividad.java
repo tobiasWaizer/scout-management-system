@@ -8,21 +8,17 @@ import lombok.Setter;
 @Table(name = "actividades")
 @Getter
 @Setter
-public class Actividad {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Actividad extends Evento {
 
     @ManyToOne
     @JoinColumn(name = "educador_id", nullable = false)
     private Persona educadorResponsable;
 
     @ManyToOne
-    @JoinColumn(name = "beneficiario_id", nullable = false)
+    @JoinColumn(name = "beneficiario_id")
     private Persona beneficiarioACargo;
 
-    private String titulo;
+
     private String materiales;
     private String desarrollo;
     private String objetivo;
@@ -37,7 +33,7 @@ public class Actividad {
     public Actividad(String titulo, String objetivo, String desarrollo, String materiales,
                      String recupero, Long duracionMinutos, Persona educadorResponsable,
                      Persona beneficiarioACargo) {
-        this.titulo = titulo;
+        setTitulo(titulo);
         this.objetivo = objetivo;
         this.desarrollo = desarrollo;
         this.materiales = materiales;

@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario de Eventos</title>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 32px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 32px 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header p {
+            margin: 8px 0 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        .hint {
+            margin: 0 0 24px;
+            color: #666;
+            font-size: 13px;
+            padding: 12px 16px;
+            background: #f0f4f8;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+
+        .filtros-container {
+            background: linear-gradient(to bottom, #f8f9fb, #f0f2f5);
+            border: 1px solid #e0e4ea;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .filtros-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .filtro-grupo {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .filtro-grupo label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filtro-grupo select {
+            padding: 10px 14px;
+            border: 2px solid #e0e4ea;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #fff;
+            color: #2c3e50;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .filtro-grupo select:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+        }
+
+        .filtro-grupo select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .tipos-label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .filtro-tipos {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .filtro-tipos {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: white;
+            border: 2px solid #e0e4ea;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .checkbox-item:hover {
+            border-color: #667eea;
+            background: #f8f9fc;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: #667eea;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            font-size: 14px;
+            color: #2c3e50;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .checkbox-item .tipo-badge {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-left: auto;
+        }
+
+        .tipo-ACTIVIDAD .tipo-badge {
+            background-color: #3498db;
+        }
+
+        .tipo-CURSO .tipo-badge {
+            background-color: #2ecc71;
+        }
+
+        .tipo-BINGO .tipo-badge {
+            background-color: #f39c12;
+        }
+
+        .tipo-CAMPAMENTO .tipo-badge {
+            background-color: #e74c3c;
+        }
+
+        #calendar {
+            min-height: 700px;
+        }
+
+        .fc {
+            font-family: inherit;
+        }
+
+        .fc-button-primary {
+            background-color: #667eea !important;
+            border-color: #667eea !important;
+        }
+
+        .fc-button-primary:hover {
+            background-color: #5568d3 !important;
+        }
+
+        .fc-button-primary:not(:disabled).fc-button-active {
+            background-color: #764ba2 !important;
+            border-color: #764ba2 !important;
+        }
+
+        .fc-daygrid-day.fc-day-today {
+            background-color: #f0f7ff !important;
+        }
+
+        .fc-event {
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .fc-event-title {
+            font-weight: 600;
+            padding: 2px 4px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 16px;
+            }
+
+            .header {
+                padding: 20px 16px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .content {
+                padding: 16px;
+            }
+
+            .filtros-container {
+                padding: 16px;
+                gap: 16px;
+            }
+
+            .filtro-tipos {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .legend-container {
+            margin-top: 24px;
+            padding: 16px;
+            background: #f8f9fb;
+            border-radius: 8px;
+            border: 1px solid #e0e4ea;
+        }
+
+        .legend-title {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .legend-items {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .legend-items {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .legend-color {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        .color-general {
+            background-color: #1976d2;
+        }
+
+        .color-rama {
+            background-color: #2e7d32;
+        }
+
+        .color-individual {
+            background-color: #ef6c00;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-calendar-alt"></i> Calendario de Eventos</h1>
+        <p>Gestión centralizada de actividades, cursos, bingos y campamentos</p>
+    </div>
+
+    <div class="content">
+        <div class="hint">
+            <i class="fas fa-info-circle"></i>
+            Filtra los eventos por rama y tipo. Los colores indican el alcance:
+            <span style="color: #1976d2; font-weight: 600;">Azul (General)</span>,
+            <span style="color: #2e7d32; font-weight: 600;">Verde (Rama)</span>,
+            <span style="color: #ef6c00; font-weight: 600;">Naranja (Individual)</span>
+        </div>
+
+        <div class="filtros-container">
+            <div class="filtro-grupo">
+                <label for="selectRama"><i class="fas fa-sitemap"></i> Filtrar por Rama</label>
+                <select id="selectRama">
+                    <option value="">📍 Todas las ramas</option>
+                </select>
+            </div>
+
+            <div class="filtro-grupo">
+                <div class="tipos-label"><i class="fas fa-list"></i> Filtrar por Tipo de Evento</div>
+                <div class="filtro-tipos">
+                    <div class="checkbox-item tipo-ACTIVIDAD">
+                        <input type="checkbox" id="chkActividad" value="ACTIVIDAD" checked>
+                        <label for="chkActividad">Actividad</label>
+                        <span class="tipo-badge"></span>
+                    </div>
+                    <div class="checkbox-item tipo-CURSO">
+                        <input type="checkbox" id="chkCurso" value="CURSO" checked>
+                        <label for="chkCurso">Curso</label>
+                        <span class="tipo-badge"></span>
+                    </div>
+                    <div class="checkbox-item tipo-BINGO">
+                        <input type="checkbox" id="chkBingo" value="BINGO" checked>
+                        <label for="chkBingo">Bingo</label>
+                        <span class="tipo-badge"></span>
+                    </div>
+                    <div class="checkbox-item tipo-CAMPAMENTO">
+                        <input type="checkbox" id="chkCampamento" value="CAMPAMENTO" checked>
+                        <label for="chkCampamento">Campamento</label>
+                        <span class="tipo-badge"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="calendar"></div>
+
+        <div class="legend-container">
+            <div class="legend-title">Leyenda de Alcance</div>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <span class="legend-color color-general"></span>
+                    <span>General</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color color-rama"></span>
+                    <span>Rama</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color color-individual"></span>
+                    <span>Individual</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script src="/js/calendario.js"></script>
+</body>
+</html>
+

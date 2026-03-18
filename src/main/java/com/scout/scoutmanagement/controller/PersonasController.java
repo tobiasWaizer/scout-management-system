@@ -1,31 +1,45 @@
 package com.scout.scoutmanagement.controller;
 
 import com.scout.scoutmanagement.DTO.PersonaDTO;
+import com.scout.scoutmanagement.domain.Pagos.Cuota;
+import com.scout.scoutmanagement.domain.Pagos.Pago;
 import com.scout.scoutmanagement.domain.Persona;
 import com.scout.scoutmanagement.domain.Rama;
+import com.scout.scoutmanagement.controller.response.ApiResponseBuilder;
+import com.scout.scoutmanagement.service.PagosService;
 import com.scout.scoutmanagement.service.PersonaService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import java.time.Year;
 
 @RestController
 @RequestMapping("/api/personas")
 public class PersonasController {
 
     private final PersonaService personaService;
+    private final PagosService pagosService;
+    private final ApiResponseBuilder apiResponseBuilder;
 
-    public PersonasController(PersonaService personaService) {
+    public PersonasController(
+        PersonaService personaService,
+        PagosService pagosService,
+        ApiResponseBuilder apiResponseBuilder
+    ) {
         this.personaService = personaService;
+        this.pagosService = pagosService;
+        this.apiResponseBuilder = apiResponseBuilder;
     }
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> crearPersona(@Valid @RequestBody PersonaDTO personaDTO) {
         Persona personaCreada = personaService.crearPersona(personaDTO);
-        Map<String, Object> respuesta = construirRespuestaPersona("Persona creada exitosamente", personaCreada);
+        Map<String, Object> respuesta = apiResponseBuilder.persona("Persona creada exitosamente", personaCreada);
         return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
     }
 
@@ -35,28 +49,28 @@ public class PersonasController {
         @Valid @RequestBody PersonaDTO personaDTO) {
 
         Persona personaActualizada = personaService.modificarPersona(personaDTO, idPersona);
-        Map<String, Object> respuesta = construirRespuestaPersona("Persona modificada exitosamente", personaActualizada);
+        Map<String, Object> respuesta = apiResponseBuilder.persona("Persona modificada exitosamente", personaActualizada);
         return ResponseEntity.status(HttpStatus.OK).body(respuesta);
     }
 
     @GetMapping("/{id_persona}")
     public ResponseEntity<Map<String, Object>> obtenerPersona(@PathVariable("id_persona") Long idPersona) {
         Persona persona = personaService.obtenerPersona(idPersona);
-        Map<String, Object> respuesta = construirRespuestaPersona("Persona encontrada exitosamente", persona);
+        Map<String, Object> respuesta = apiResponseBuilder.persona("Persona encontrada exitosamente", persona);
         return ResponseEntity.status(HttpStatus.OK).body(respuesta);
     }
 
     @DeleteMapping("/{id_persona}")
     public ResponseEntity<Map<String, Object>> darDeBajaPersona(@PathVariable("id_persona") Long idPersona) {
         Persona persona = personaService.inhabilitarPersona(idPersona);
-        Map<String, Object> respuesta = construirRespuestaPersona("Persona dada de baja exitosamente", persona);
+        Map<String, Object> respuesta = apiResponseBuilder.persona("Persona dada de baja exitosamente", persona);
         return ResponseEntity.status(HttpStatus.OK).body(respuesta);
     }
 
     @PatchMapping("/{id_persona}/partida")
     public ResponseEntity<Map<String, Object>> realizarPartida(@PathVariable("id_persona") Long idPersona, Long rama_id) {
         Persona persona = personaService.realizarPartida(idPersona, rama_id);
-        Map<String, Object> respuesta = construirRespuestaPersona("Partida realizada exitosamente", persona);
+        Map<String, Object> respuesta = apiResponseBuilder.persona("Partida realizada exitosamente", persona);
         return ResponseEntity.status(HttpStatus.OK).body(respuesta);
     }
 
@@ -65,7 +79,7 @@ public class PersonasController {
         Rama ramaActualizada = personaService.establecerJefeDeRama(idPersona);
         Persona persona = personaService.obtenerPersona(idPersona);
 
-        Map<String, Object> respuesta = construirRespuestaPersona(
+        Map<String, Object> respuesta = apiResponseBuilder.persona(
             "Persona establecida como jefe de la rama " + ramaActualizada.getNombre() + " exitosamente",
             persona
         );
@@ -73,19 +87,38 @@ public class PersonasController {
         return ResponseEntity.status(HttpStatus.OK).body(respuesta);
     }
 
-    private Map<String, Object> construirRespuestaPersona(String mensaje, Persona persona) {
-        Map<String, Object> respuesta = new HashMap<>();
-        respuesta.put("mensaje", mensaje);
-        respuesta.put("id", persona.getId());
-        respuesta.put("nombre", persona.getNombre());
-        respuesta.put("apellido", persona.getApellido());
-        respuesta.put("dni", persona.getDni());
-        respuesta.put("mail", persona.getMail());
-        respuesta.put("rol", persona.getRol());
-        respuesta.put("ramaId", persona.getRama() != null ? persona.getRama().getId() : null);
-        respuesta.put("activo", persona.getActivo());
-        return respuesta;
+    @GetMapping("/{id_persona}/pagos")
+    public ResponseEntity<Map<String, Object>> obtenerPagosDePersona(
+        @PathVariable("id_persona") Long idPersona,
+        @RequestParam(name = "anio", required = false) Integer anio
+    ) {
+        Integer anioFiltro = anio != null ? anio : Year.now().getValue();
+        List<Pago> pagos = pagosService.obtenerPagosDePersonaId(idPersona, anioFiltro);
+        Map<String, Object> respuesta = apiResponseBuilder.pagosDePersona("Pagos obtenidos exitosamente", idPersona, anioFiltro, pagos);
+        return ResponseEntity.status(HttpStatus.OK).body(respuesta);
     }
+
+    @GetMapping("/{id_persona}/cuotas")
+    public ResponseEntity<Map<String, Object>> obtenerCuotasDePersona(
+        @PathVariable("id_persona") Long idPersona,
+        @RequestParam(name = "pendiente", defaultValue = "false") boolean pendiente,
+        @RequestParam(name = "activo", defaultValue = "false") boolean activo,
+        @RequestParam(name = "anio", required = false) Integer anio
+    ) {
+        Integer anioFiltro = anio != null ? anio : Year.now().getValue();
+        List<Cuota> cuotas = personaService.obtenerCuotasDePersona(idPersona, pendiente, activo, anioFiltro);
+        Map<String, Object> respuesta = apiResponseBuilder.cuotasDePersona(
+            "Cuotas obtenidas exitosamente",
+            idPersona,
+            pendiente,
+            activo,
+            anioFiltro,
+            cuotas
+        );
+        return ResponseEntity.status(HttpStatus.OK).body(respuesta);
+    }
+
+    
 }
 
 //TODO: vamos a ponernos a investigar un poco sobre como se gestionan los pagos en un sistema comun,

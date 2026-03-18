@@ -24,6 +24,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -127,6 +128,24 @@ class PagosServiceTest {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> pagosService.generarPago(dto));
 
         assertEquals("No se permiten IDs de cuotas repetidos en el mismo pago", ex.getMessage());
+    }
+
+    @Test
+    void obtenerPagosDePersonaId_deberiaValidarPersonaYRetornarPagosOrdenados() {
+        Long idPersona = 1L;
+        Integer anio = 2026;
+        Persona persona = new Persona();
+        persona.setId(idPersona);
+
+        Pago pago = new Pago();
+        when(personaService.obtenerPersona(idPersona)).thenReturn(persona);
+        when(pagoRepository.obtenerPagosDePersonaDesdeAnioOrdenadasPorFecha(idPersona, anio)).thenReturn(List.of(pago));
+
+        List<Pago> resultado = pagosService.obtenerPagosDePersonaId(idPersona, anio);
+
+        assertEquals(1, resultado.size());
+        verify(personaService).obtenerPersona(eq(idPersona));
+        verify(pagoRepository).obtenerPagosDePersonaDesdeAnioOrdenadasPorFecha(eq(idPersona), eq(anio));
     }
 
     private Costos crearCosto(Long id, Persona personaObjetivo, String importe) {

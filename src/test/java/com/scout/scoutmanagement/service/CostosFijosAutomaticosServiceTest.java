@@ -6,7 +6,6 @@ import com.scout.scoutmanagement.domain.Pagos.CostosFijos;
 import com.scout.scoutmanagement.domain.Pagos.Motivo;
 import com.scout.scoutmanagement.domain.Persona;
 import com.scout.scoutmanagement.repository.CostosRepository;
-import com.scout.scoutmanagement.repository.PersonaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -28,8 +27,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CostosFijosAutomaticosServiceTest {
 
-    @Mock
-    private PersonaRepository personaRepository;
 
     @Mock
     private CostosRepository costosRepository;

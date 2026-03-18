@@ -9,7 +9,6 @@ import com.scout.scoutmanagement.domain.Pagos.Pago;
 import com.scout.scoutmanagement.domain.Persona;
 import com.scout.scoutmanagement.repository.CostosRepository;
 import com.scout.scoutmanagement.repository.CostosVariablesRepository;
-import com.scout.scoutmanagement.repository.CuotaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,18 +24,18 @@ public class CostosService {
 
     private final CostosVariablesRepository costosVariablesRepository;
     private final CostosRepository costosRepository;
-    private final CuotaRepository cuotaRepository;
+    private final CuotaService cuotaService;
     private final PersonaService personaService;
 
     public CostosService(
         CostosVariablesRepository costosVariablesRepository,
         CostosRepository costosRepository,
-        CuotaRepository cuotaRepository,
+        CuotaService cuotaService,
         PersonaService personaService
     ) {
         this.costosVariablesRepository = costosVariablesRepository;
         this.costosRepository = costosRepository;
-        this.cuotaRepository = cuotaRepository;
+        this.cuotaService = cuotaService;
         this.personaService = personaService;
     }
 
@@ -47,7 +46,7 @@ public class CostosService {
 
     @Transactional(readOnly = true)
     public List<Cuota> obtenerCuotasPorIds(List<Long> cuotaIds) {
-        return cuotaRepository.findAllById(cuotaIds);
+        return cuotaService.obtenerCuotasPorIds(cuotaIds);
     }
 
     @Transactional
@@ -73,7 +72,7 @@ public class CostosService {
         }
 
         cuotas.forEach(cuota -> cuota.setPago(pago));
-        cuotaRepository.saveAll(cuotas);
+        cuotaService.guardarTodas(cuotas);
     }
 
     private void asociarPago(Costos costo, Pago pago) {

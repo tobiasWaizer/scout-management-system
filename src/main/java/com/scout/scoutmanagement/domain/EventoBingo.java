@@ -1,16 +1,26 @@
 package com.scout.scoutmanagement.domain;
 
-import java.time.LocalDate;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
+
 import java.util.List;
 
-
+@Entity
+@Table(name = "eventos_bingo")
 public class EventoBingo extends Evento {
+    @ManyToMany
     List<Persona> cocineros;
-    List<Persona> cartoneros; //quizas haga falta crear una clase generica para las personas
+    @ManyToMany
+    List<Persona> cartoneros;
+    @ManyToMany
     List<Persona> bacha;
 
-     public EventoBingo(Long id, String nombre, String descripcion, LocalDate fechaInicio, LocalDate fechaFin, List<Persona> cocineros, List<Persona> cartoneros, List<Persona> bacha) {
-        super(id, nombre, descripcion, fechaInicio, fechaFin);
+    public EventoBingo() {
+    }
+
+    public EventoBingo(String titulo, List<Persona> cocineros, List<Persona> cartoneros, List<Persona> bacha) {
+        setTitulo(titulo);
         this.cocineros = cocineros;
         this.cartoneros = cartoneros;
         this.bacha = bacha;

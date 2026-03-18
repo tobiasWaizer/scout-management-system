@@ -1,12 +1,14 @@
 package com.scout.scoutmanagement.service;
 
 import com.scout.scoutmanagement.DTO.PersonaDTO;
+import com.scout.scoutmanagement.domain.Pagos.CostosFijos;
+import com.scout.scoutmanagement.domain.Pagos.Cuota;
+import com.scout.scoutmanagement.domain.Pagos.Motivo;
 import com.scout.scoutmanagement.domain.Persona;
 import com.scout.scoutmanagement.domain.Rama;
 import com.scout.scoutmanagement.domain.Rol;
 import com.scout.scoutmanagement.exception.ObjectNotFoundException;
 import com.scout.scoutmanagement.repository.PersonaRepository;
-import com.scout.scoutmanagement.repository.RamaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,7 +29,10 @@ class PersonaServiceTest {
     private PersonaRepository personaRepository;
 
     @Mock
-    private RamaRepository ramaRepository;
+    private RamaService ramaService;
+
+    @Mock
+    private CuotaService cuotaService;
 
     @Mock
     private CostosFijosAutomaticosService costosFijosAutomaticosService;
@@ -53,7 +58,7 @@ class PersonaServiceTest {
 
         when(personaRepository.findByDni(dto.getDni())).thenReturn(Optional.empty());
         when(personaRepository.findByMail(dto.getMail())).thenReturn(Optional.empty());
-        when(ramaRepository.findById(dto.getRamaId())).thenReturn(Optional.of(rama));
+        when(ramaService.obtenerRamaPorId(dto.getRamaId())).thenReturn(rama);
         when(personaRepository.save(any(Persona.class))).thenReturn(guardada);
 
         Persona resultado = personaService.crearPersona(dto);
@@ -73,7 +78,7 @@ class PersonaServiceTest {
         ramaDestino.setId(2L);
 
         when(personaRepository.findByIdAndRol(7L, Rol.BENEFICIARIO)).thenReturn(Optional.of(persona));
-        when(ramaRepository.findById(2L)).thenReturn(Optional.of(ramaDestino));
+        when(ramaService.obtenerRamaPorId(2L)).thenReturn(ramaDestino);
         when(personaRepository.save(any(Persona.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Persona resultado = personaService.realizarPartida(7L, 2L);
@@ -89,5 +94,62 @@ class PersonaServiceTest {
         ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> personaService.realizarPartida(7L, 2L));
 
         assertEquals("No existe un beneficiario con ID: 7", ex.getMessage());
+    }
+
+    @Test
+    void obtenerCuotasDePersona_deberiaTraerSoloPendientesCuandoPendienteEsTrue() {
+        Persona persona = new Persona();
+        persona.setId(2L);
+        persona.setActivo(true);
+
+        Cuota cuotaPendiente = new Cuota();
+        cuotaPendiente.setOrdenCuota(1);
+        cuotaPendiente.setCosto(new CostosFijos());
+        cuotaPendiente.getCosto().setMotivo(Motivo.CUOTA_MENSUAL);
+
+        when(personaRepository.findById(2L)).thenReturn(Optional.of(persona));
+        when(cuotaService.obtenerCuotasDePersonaOrdenadasPorCosto(2L, true, 2026))
+            .thenReturn(java.util.List.of(cuotaPendiente));
+
+        java.util.List<Cuota> resultado = personaService.obtenerCuotasDePersona(2L, true, false, 2026);
+
+        assertEquals(1, resultado.size());
+    }
+
+    @Test
+    void obtenerCuotasDePersona_deberiaFallarSiActivoEsTrueYLaPersonaEstaInactiva() {
+        Persona persona = new Persona();
+        persona.setId(2L);
+        persona.setActivo(false);
+
+        when(personaRepository.findById(2L)).thenReturn(Optional.of(persona));
+
+        java.util.List<Cuota> resultado = personaService.obtenerCuotasDePersona(2L, false, true);
+
+        assertEquals(0, resultado.size());
+    }
+
+    @Test
+    void obtenerCuotasDePersona_deberiaFiltrarPorAnioYTraerDesdeeseAnio() {
+        Persona persona = new Persona();
+        persona.setId(2L);
+        persona.setActivo(true);
+
+        CostosFijos costo2025 = new CostosFijos();
+        costo2025.setMotivo(Motivo.CUOTA_MENSUAL);
+        costo2025.setAnio(2025);
+
+        Cuota cuota2025 = new Cuota();
+        cuota2025.setOrdenCuota(1);
+        cuota2025.setCosto(costo2025);
+
+        when(personaRepository.findById(2L)).thenReturn(Optional.of(persona));
+        when(cuotaService.obtenerCuotasDePersonaOrdenadasPorCosto(2L, false, 2025))
+            .thenReturn(java.util.List.of(cuota2025));
+
+        java.util.List<Cuota> resultado = personaService.obtenerCuotasDePersona(2L, false, false, 2025);
+
+        assertEquals(1, resultado.size());
+        assertEquals(2025, ((CostosFijos) resultado.get(0).getCosto()).getAnio());
     }
 }

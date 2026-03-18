@@ -6,7 +6,6 @@ import com.scout.scoutmanagement.domain.Pagos.Cuota;
 import com.scout.scoutmanagement.domain.Pagos.Motivo;
 import com.scout.scoutmanagement.domain.Persona;
 import com.scout.scoutmanagement.repository.CostosRepository;
-import com.scout.scoutmanagement.repository.PersonaRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +18,6 @@ public class CostosFijosAutomaticosService {
     private static final Motivo TIPO_AFILIACION = Motivo.AFILIACION;
     private static final Motivo TIPO_CUOTA_MENSUAL = Motivo.CUOTA_MENSUAL;
 
-    private final PersonaRepository personaRepository;
     private final CostosRepository costosRepository;
 
     @Value("${pagos.importe.afiliacion:5000}")
@@ -29,23 +27,11 @@ public class CostosFijosAutomaticosService {
     private BigDecimal importeCuotaMensual;
 
     public CostosFijosAutomaticosService(
-        PersonaRepository personaRepository,
         CostosRepository costosRepository
     ) {
-        this.personaRepository = personaRepository;
         this.costosRepository = costosRepository;
     }
 
-    @Transactional
-    public void generarParaTodasLasPersonas(Integer anio, Integer mes) {
-        personaRepository.findByActivoTrue().forEach(persona -> generarParaPersona(persona, anio, mes));
-    }
-
-    @Transactional
-    public void generarDesdeMesHastaFinDeAnioParaTodasLasPersonas(Integer anio, Integer mesInicio) {
-        personaRepository.findByActivoTrue()
-            .forEach(persona -> generarDesdeMesHastaFinDeAnioParaPersona(persona, anio, mesInicio));
-    }
 
     @Transactional
     public void generarParaPersona(Persona persona, Integer anio, Integer mes) {

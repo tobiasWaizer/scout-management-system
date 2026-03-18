@@ -13,20 +13,28 @@ import java.time.YearMonth;
 public class CostosFijosBootstrap {
 
     private final CostosFijosAutomaticosService costosFijosAutomaticosService;
+    private final PersonaService personaService;
 
     @Value("${pagos.cuota-mensual.mes-inicio-generacion:3}")
     private Integer mesInicioGeneracion;
 
-    public CostosFijosBootstrap(CostosFijosAutomaticosService costosFijosAutomaticosService) {
+    public CostosFijosBootstrap(
+        CostosFijosAutomaticosService costosFijosAutomaticosService,
+        PersonaService personaService
+    ) {
         this.costosFijosAutomaticosService = costosFijosAutomaticosService;
+        this.personaService = personaService;
     }
 
     @EventListener(ApplicationReadyEvent.class)
     public void generarCostosIniciales() {
         YearMonth periodoActual = YearMonth.now();
-        costosFijosAutomaticosService.generarDesdeMesHastaFinDeAnioParaTodasLasPersonas(
-            periodoActual.getYear(),
-            mesInicioGeneracion
+        personaService.obtenerPersonasActivas().forEach(persona ->
+            costosFijosAutomaticosService.generarDesdeMesHastaFinDeAnioParaPersona(
+                persona,
+                periodoActual.getYear(),
+                mesInicioGeneracion
+            )
         );
     }
 }

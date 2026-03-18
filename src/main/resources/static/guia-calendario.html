@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía del Calendario de Eventos - Scout Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 60px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .header h1 {
+            font-size: 44px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 22px;
+        }
+
+        .card p {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            color: #555;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-list i {
+            color: #667eea;
+            width: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            margin-top: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .code-block {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 15px 0;
+            color: #333;
+        }
+
+        .color-badge {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        .color-actividad { background-color: #3498db; }
+        .color-curso { background-color: #2ecc71; }
+        .color-bingo { background-color: #f39c12; }
+        .color-campamento { background-color: #e74c3c; }
+
+        .color-general { background-color: #1976d2; }
+        .color-rama { background-color: #2e7d32; }
+        .color-individual { background-color: #ef6c00; }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 28px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .screenshot {
+            width: 100%;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 1px solid #eee;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .emoji {
+            font-size: 28px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 32px;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-calendar-alt"></i> Guía del Calendario de Eventos</h1>
+            <p>Scout Management - Sistema de Gestión de Actividades</p>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2><span class="emoji">🎨</span> Diseño Moderno</h2>
+                <p>Interfaz limpia y atractiva con gradientes, sombras y animaciones suaves.</p>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check"></i> Responsive (móvil, tablet, desktop)</li>
+                    <li><i class="fas fa-check"></i> Animaciones fluidas</li>
+                    <li><i class="fas fa-check"></i> Accesibilidad mejorada</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2><span class="emoji">🔍</span> Filtros Avanzados</h2>
+                <p>Filtra eventos por rama, tipo y alcance con controles intuitivos.</p>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check"></i> Desplegable de ramas dinámico</li>
+                    <li><i class="fas fa-check"></i> Checkboxes de tipos</li>
+                    <li><i class="fas fa-check"></i> Filtrado en tiempo real</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2><span class="emoji">🎯</span> Tipos de Evento</h2>
+                <p>Cada tipo de evento tiene color e icono distintivo.</p>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check"></i> Actividad - <span class="color-badge color-actividad"></span>Azul</li>
+                    <li><i class="fas fa-check"></i> Curso - <span class="color-badge color-curso"></span>Verde</li>
+                    <li><i class="fas fa-check"></i> Bingo - <span class="color-badge color-bingo"></span>Naranja</li>
+                    <li><i class="fas fa-check"></i> Campamento - <span class="color-badge color-campamento"></span>Rojo</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2><span class="emoji">📊</span> Alcances Visuales</h2>
+                <p>Los colores de fondo indican el alcance del evento.</p>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check"></i> General - <span class="color-badge color-general"></span>Azul</li>
+                    <li><i class="fas fa-check"></i> Rama - <span class="color-badge color-rama"></span>Verde</li>
+                    <li><i class="fas fa-check"></i> Individual - <span class="color-badge color-individual"></span>Naranja</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2><span class="emoji">💬</span> Modal Mejorado</h2>
+                <p>Detalles completos del evento en un modal elegante.</p>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check"></i> Información estructurada</li>
+                    <li><i class="fas fa-check"></i> Fácil de cerrar</li>
+                    <li><i class="fas fa-check"></i> Badges de color</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2><span class="emoji">📱</span> Responsividad</h2>
+                <p>Funciona perfectamente en todos los dispositivos.</p>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check"></i> Mobile optimizado</li>
+                    <li><i class="fas fa-check"></i> Tablet amigable</li>
+                    <li><i class="fas fa-check"></i> Desktop completo</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><i class="fas fa-book"></i> Cómo Usar el Calendario</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(0)">Acceso</button>
+                <button class="tab-btn" onclick="switchTab(1)">Filtros</button>
+                <button class="tab-btn" onclick="switchTab(2)">Vistas</button>
+                <button class="tab-btn" onclick="switchTab(3)">Detalles</button>
+            </div>
+
+            <div class="tab-content active">
+                <h3>Formas de Acceder</h3>
+                <p>El calendario puede accederse de varias formas:</p>
+
+                <h4>1. URL Directa</h4>
+                <div class="code-block">
+                    http://localhost:8080/calendario.html
+                </div>
+
+                <h4>2. Desde una Rama Específica</h4>
+                <div class="code-block">
+                    http://localhost:8080/ramas/1/calendario
+                </div>
+                <p>El parámetro <code>ramaId=1</code> se pasa automáticamente</p>
+
+                <h4>3. Con Filtro de Persona</h4>
+                <div class="code-block">
+                    http://localhost:8080/calendario.html?personaId=5
+                </div>
+                <p>Muestra solo eventos relacionados con la persona 5</p>
+
+                <h4>4. Con Ambos Filtros</h4>
+                <div class="code-block">
+                    http://localhost:8080/calendario.html?personaId=5&ramaId=2
+                </div>
+            </div>
+
+            <div class="tab-content">
+                <h3>Sistema de Filtros</h3>
+
+                <h4><i class="fas fa-sitemap"></i> Filtro por Rama</h4>
+                <ul>
+                    <li>Selecciona una rama del desplegable</li>
+                    <li>Las ramas se cargan automáticamente desde <code>/api/ramas</code></li>
+                    <li>"Todas las ramas" muestra eventos de todas</li>
+                    <li>El cambio se refleja instantáneamente</li>
+                </ul>
+
+                <h4><i class="fas fa-list"></i> Filtro por Tipo de Evento</h4>
+                <ul>
+                    <li>Marca/desmarca los checkboxes según lo necesites</li>
+                    <li>Puedes combinar múltiples tipos</li>
+                    <li>Todos están marcados por defecto</li>
+                    <li>Los cambios se aplican sin recargar la página</li>
+                </ul>
+
+                <h4>Filtro de URL (automático)</h4>
+                <ul>
+                    <li><code>?personaId=X</code> - Filtra por persona</li>
+                    <li><code>?ramaId=Y</code> - Filtra por rama</li>
+                    <li>Los parámetros son procesados automáticamente</li>
+                </ul>
+            </div>
+
+            <div class="tab-content">
+                <h3>Vistas del Calendario</h3>
+
+                <p>El calendario ofrece 3 vistas principales:</p>
+
+                <h4>📅 Vista Mensual</h4>
+                <ul>
+                    <li>Muestra el mes completo</li>
+                    <li>Ideal para planificación a largo plazo</li>
+                    <li>Ver patrones y distribución de eventos</li>
+                </ul>
+
+                <h4>📆 Vista Semanal</h4>
+                <ul>
+                    <li>Muestra una semana con horas</li>
+                    <li>Perfecta para ver detalles de tiempo</li>
+                    <li>Identificar conflictos de horarios</li>
+                </ul>
+
+                <h4>📊 Vista Diaria</h4>
+                <ul>
+                    <li>Muestra un día completo con horas</li>
+                    <li>Máximo detalle y precisión</li>
+                    <li>Planificación detallada</li>
+                </ul>
+
+                <h4>Controles de Navegación</h4>
+                <ul>
+                    <li><strong>&lt; y &gt;</strong> - Navegar entre períodos</li>
+                    <li><strong>Today</strong> - Ir al día actual</li>
+                    <li><strong>Selector de vista</strong> - Cambiar entre mes/semana/día</li>
+                </ul>
+            </div>
+
+            <div class="tab-content">
+                <h3>Detalles del Evento</h3>
+
+                <p>Al hacer click en un evento, se abre un modal con la información:</p>
+
+                <h4>Información Mostrada</h4>
+                <ul>
+                    <li><strong>Título</strong> - Nombre del evento</li>
+                    <li><strong>Tipo</strong> - ACTIVIDAD, CURSO, BINGO o CAMPAMENTO (con color)</li>
+                    <li><strong>Fechas</strong> - Inicio y fin</li>
+                    <li><strong>Alcance</strong> - General, Rama o Individual</li>
+                    <li><strong>Rama</strong> - ID de la rama asociada</li>
+                    <li><strong>Educador</strong> - ID del responsable</li>
+                    <li><strong>Beneficiario</strong> - ID de la persona a cargo</li>
+                    <li><strong>Nivel</strong> - Nivel de curso (si aplica)</li>
+                </ul>
+
+                <h4>Interacción</h4>
+                <ul>
+                    <li>Haz click en cualquier evento para abrir el modal</li>
+                    <li>Haz click en "Cerrar" o fuera del modal para cerrarlo</li>
+                    <li>Los colores corresponden al tipo de evento</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><i class="fas fa-code"></i> Información Técnica</h2>
+
+            <h3>Endpoints Utilizados</h3>
+
+            <h4>GET /api/ramas</h4>
+            <div class="code-block">
+                Obtiene todas las ramas disponibles
+                Respuesta: { "ramas": [...] }
+            </div>
+
+            <h4>GET /api/eventos/rango</h4>
+            <div class="code-block">
+                Parámetros:
+                - desde: LocalDateTime (ISO 8601)
+                - hasta: LocalDateTime (ISO 8601)
+                - personaId (opcional): Long
+                - ramaId (opcional): Long
+                - tipoEvento (opcional): String
+
+                Respuesta: { "eventos": [...] }
+            </div>
+
+            <h3>Tecnologías Utilizadas</h3>
+            <ul class="feature-list">
+                <li><i class="fas fa-check"></i> FullCalendar 6.1.15 - Librería de calendario</li>
+                <li><i class="fas fa-check"></i> Font Awesome 6.4.0 - Iconos vectoriales</li>
+                <li><i class="fas fa-check"></i> CSS Grid & Flexbox - Layouts responsivos</li>
+                <li><i class="fas fa-check"></i> Vanilla JavaScript - Sin dependencias adicionales</li>
+            </ul>
+
+            <h3>Navegadores Soportados</h3>
+            <ul class="feature-list">
+                <li><i class="fas fa-check"></i> Chrome/Edge 88+</li>
+                <li><i class="fas fa-check"></i> Firefox 87+</li>
+                <li><i class="fas fa-check"></i> Safari 14+</li>
+                <li><i class="fas fa-check"></i> Opera 74+</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2><i class="fas fa-lightbulb"></i> Tips & Trucos</h2>
+
+            <ul class="feature-list">
+                <li><i class="fas fa-star"></i> <strong>Filtros rápidos:</strong> Usa los checkboxes para mostrar/ocultar tipos rápidamente</li>
+                <li><i class="fas fa-star"></i> <strong>Vista semanal:</strong> Ideal para detectar conflictos de horarios</li>
+                <li><i class="fas fa-star"></i> <strong>Query strings:</strong> Puedes compartir URLs con filtros pre-aplicados</li>
+                <li><i class="fas fa-star"></i> <strong>Modal:</strong> Ciérralo haciendo click fuera o en el botón de cerrar</li>
+                <li><i class="fas fa-star"></i> <strong>Colores:</strong> Memoriza los colores para identificar tipos rápidamente</li>
+                <li><i class="fas fa-star"></i> <strong>Today:</strong> Usa el botón "Today" para volver al día actual rápidamente</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2><i class="fas fa-rocket"></i> Próximas Mejoras</h2>
+
+            <ul class="feature-list">
+                <li><i class="fas fa-arrow-right"></i> Edición de eventos desde el modal</li>
+                <li><i class="fas fa-arrow-right"></i> Creación rápida de eventos</li>
+                <li><i class="fas fa-arrow-right"></i> Exportación a PDF e iCal</li>
+                <li><i class="fas fa-arrow-right"></i> Notificaciones de eventos próximos</li>
+                <li><i class="fas fa-arrow-right"></i> Búsqueda y filtrado avanzado</li>
+                <li><i class="fas fa-arrow-right"></i> Sincronización con calendarios externos</li>
+                <li><i class="fas fa-arrow-right"></i> Vista de agenda (lista)</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; padding: 40px 0;">
+            <a href="/calendario.html" class="btn">
+                <i class="fas fa-calendar-alt"></i> Ir al Calendario
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(index) {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabBtns.forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+
+            tabContents.forEach((content, i) => {
+                content.classList.toggle('active', i === index);
+            });
+        }
+    </script>
+</body>
+</html>
+

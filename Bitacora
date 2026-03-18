@@ -1,0 +1,29 @@
+dia 18/3
+hoy terminé de hacer los endpoints de crear un costo, que ese costo en caso de ser fijo se genere automaticamente para cda persona activa del sistema, tambien hay que tener en cuenta que el endpoint de crear costo solo aplica para los costos variables como campamentos, excursiones, etc ya que los otros se autogeneran.
+
+{
+  "nombre": "Campamento Mayo",
+  "id_creador": 1, debera ser de un admin todo: hacer despues
+  "cuotas": [
+    {
+      "ordenCuota": 1,
+      "monto": 3000
+    },
+    {
+      "ordenCuota": 2,
+      "monto": 5000
+    }
+  ]
+}
+
+Con respecto a los pagos hicimos el endpoint de pagar uno/varias cuotas.
+{
+  "personaId": 1,
+  "personaQueRegistraId": 1,
+  "cuotaIds": [1, 2],
+  "fecha": "2026-03-17"
+}
+se maneja por id de cuota
+
+Abstrajimos las respuestas en un objeto ApiResponseBuilder
+creamos endpoint get/personas/idPersona/pagos para ver los pagos de una persona.
