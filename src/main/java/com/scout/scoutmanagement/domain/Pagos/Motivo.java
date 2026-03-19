@@ -7,3 +7,4 @@ public enum Motivo {
     CAMPAMENTO_CORTO,
     CAMPAMENTO_ANUAL
 }
+

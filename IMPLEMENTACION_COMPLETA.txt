@@ -69,7 +69,7 @@
 │   • Fechas de inicio y fin                                                  │
 │   • Información de alcance (con color)                                      │
 │   • ID de rama                                                              │
-│   • Nivel de curso                                                          │
+│   • Nivel de eventoCurso                                                          │
 │   • ID de educador responsable                                              │
 │   • ID de beneficiario a cargo                                              │
 │                                                                              │

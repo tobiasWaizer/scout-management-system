@@ -48,4 +48,7 @@ public abstract class Evento {
     public Evento() {
 
     }
+
+    public abstract TipoEvento getTipo();
 }
+

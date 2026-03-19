@@ -22,14 +22,14 @@ public class ProgramaRama {
 
     @OneToMany
     @JoinColumn(name = "programa_rama_id")
-    List<Actividad> actividades;
+    List<EventoActividad> actividades;
 
     String objetivo;
     String tematica;
 
 
-    public void agregarActividad(Actividad actividad) {
-        actividades.add(actividad);
+    public void agregarActividad(EventoActividad eventoActividad) {
+        actividades.add(eventoActividad);
     }
 
     public ProgramaRama() {
@@ -43,3 +43,4 @@ public class ProgramaRama {
         this.tematica = tematica;
     }
 }
+

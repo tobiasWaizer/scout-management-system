@@ -1,16 +1,16 @@
-package com.scout.scoutmanagement.service.pagos;
+package com.scout.scoutmanagement.backend.service.pagos;
 
-import com.scout.scoutmanagement.DTO.PagoDTO;
+import com.scout.scoutmanagement.backend.dto.PagoDTO;
 import com.scout.scoutmanagement.domain.Pagos.Costos;
 import com.scout.scoutmanagement.domain.Pagos.CostosFijos;
 import com.scout.scoutmanagement.domain.Pagos.Cuota;
 import com.scout.scoutmanagement.domain.Pagos.Motivo;
 import com.scout.scoutmanagement.domain.Pagos.Pago;
 import com.scout.scoutmanagement.domain.Persona;
-import com.scout.scoutmanagement.repository.PagoRepository;
-import com.scout.scoutmanagement.service.CostosService;
-import com.scout.scoutmanagement.service.PagosService;
-import com.scout.scoutmanagement.service.PersonaService;
+import com.scout.scoutmanagement.backend.repository.PagoRepository;
+import com.scout.scoutmanagement.backend.service.CostosService;
+import com.scout.scoutmanagement.backend.service.PagosService;
+import com.scout.scoutmanagement.backend.service.PersonaService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

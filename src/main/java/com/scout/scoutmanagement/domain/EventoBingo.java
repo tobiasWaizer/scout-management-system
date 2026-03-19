@@ -17,12 +17,20 @@ public class EventoBingo extends Evento {
     List<Persona> bacha;
 
     public EventoBingo() {
+        setAlcanceEvento(AlcanceEvento.GENERAL);
     }
 
     public EventoBingo(String titulo, List<Persona> cocineros, List<Persona> cartoneros, List<Persona> bacha) {
         setTitulo(titulo);
+        setAlcanceEvento(AlcanceEvento.GENERAL);
         this.cocineros = cocineros;
         this.cartoneros = cartoneros;
         this.bacha = bacha;
     }
+
+    @Override
+    public TipoEvento getTipo() {
+        return TipoEvento.BINGO;
+    }
 }
+

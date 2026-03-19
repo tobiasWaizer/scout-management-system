@@ -1,8 +1,9 @@
-package com.scout.scoutmanagement.service;
+package com.scout.scoutmanagement.backend.service;
 
 import com.scout.scoutmanagement.domain.Rama;
-import com.scout.scoutmanagement.exception.ObjectNotFoundException;
-import com.scout.scoutmanagement.repository.RamaRepository;
+import com.scout.scoutmanagement.backend.exception.ObjectNotFoundException;
+import com.scout.scoutmanagement.backend.repository.RamaRepository;
+import com.scout.scoutmanagement.backend.service.RamaService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -28,3 +28,4 @@ public class CostosVariables extends Costos {
         setCuotas(cuotas);
     }
 }
+

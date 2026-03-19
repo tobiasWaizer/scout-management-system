@@ -4,6 +4,8 @@ public enum TipoEvento {
     ACTIVIDAD,
     CURSO,
     CAMPAMENTO,
-    BINGO
+    BINGO,
+    CONSEJO
 }
+
 

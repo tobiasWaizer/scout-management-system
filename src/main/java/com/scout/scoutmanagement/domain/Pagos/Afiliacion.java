@@ -7,3 +7,4 @@ import jakarta.persistence.Entity;
 @DiscriminatorValue("AFILIACION")
 public class Afiliacion extends CostosFijos {
 }
+

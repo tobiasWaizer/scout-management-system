@@ -18,3 +18,4 @@ public class CostosFijos extends Costos {
     private Integer cantidadMeses;
 
 }
+

@@ -1,14 +1,18 @@
-package com.scout.scoutmanagement.service;
+package com.scout.scoutmanagement.backend.service;
 
-import com.scout.scoutmanagement.DTO.PersonaDTO;
+import com.scout.scoutmanagement.backend.dto.PersonaDTO;
 import com.scout.scoutmanagement.domain.Pagos.CostosFijos;
 import com.scout.scoutmanagement.domain.Pagos.Cuota;
 import com.scout.scoutmanagement.domain.Pagos.Motivo;
 import com.scout.scoutmanagement.domain.Persona;
 import com.scout.scoutmanagement.domain.Rama;
 import com.scout.scoutmanagement.domain.Rol;
-import com.scout.scoutmanagement.exception.ObjectNotFoundException;
-import com.scout.scoutmanagement.repository.PersonaRepository;
+import com.scout.scoutmanagement.backend.exception.ObjectNotFoundException;
+import com.scout.scoutmanagement.backend.repository.PersonaRepository;
+import com.scout.scoutmanagement.backend.service.CostosFijosAutomaticosService;
+import com.scout.scoutmanagement.backend.service.CuotaService;
+import com.scout.scoutmanagement.backend.service.PersonaService;
+import com.scout.scoutmanagement.backend.service.RamaService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

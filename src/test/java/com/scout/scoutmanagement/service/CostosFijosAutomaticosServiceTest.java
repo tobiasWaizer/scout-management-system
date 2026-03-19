@@ -1,11 +1,12 @@
-package com.scout.scoutmanagement.service;
+package com.scout.scoutmanagement.backend.service;
 
 import com.scout.scoutmanagement.domain.Pagos.Afiliacion;
 import com.scout.scoutmanagement.domain.Pagos.Costos;
 import com.scout.scoutmanagement.domain.Pagos.CostosFijos;
 import com.scout.scoutmanagement.domain.Pagos.Motivo;
 import com.scout.scoutmanagement.domain.Persona;
-import com.scout.scoutmanagement.repository.CostosRepository;
+import com.scout.scoutmanagement.backend.repository.CostosRepository;
+import com.scout.scoutmanagement.backend.service.CostosFijosAutomaticosService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
