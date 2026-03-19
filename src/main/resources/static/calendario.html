@@ -104,6 +104,10 @@
             cursor: pointer;
         }
 
+        .filtro-grupo select[multiple] {
+            min-height: 140px;
+        }
+
         .filtro-grupo select:hover {
             border-color: #667eea;
             box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
@@ -190,6 +194,22 @@
 
         .tipo-CAMPAMENTO .tipo-badge {
             background-color: #e74c3c;
+        }
+
+        .tipo-CONSEJO .tipo-badge {
+            background-color: #8e44ad;
+        }
+
+        .alcance-GENERAL .tipo-badge {
+            background-color: #1976d2;
+        }
+
+        .alcance-RAMA .tipo-badge {
+            background-color: #2e7d32;
+        }
+
+        .alcance-EDUCADORES .tipo-badge {
+            background-color: #8e44ad;
         }
 
         #calendar {
@@ -309,6 +329,10 @@
         .color-individual {
             background-color: #ef6c00;
         }
+
+        .color-educadores {
+            background-color: #8e44ad;
+        }
     </style>
 </head>
 <body>
@@ -321,41 +345,67 @@
     <div class="content">
         <div class="hint">
             <i class="fas fa-info-circle"></i>
-            Filtra los eventos por rama y tipo. Los colores indican el alcance:
+            Filtra los eventos por ramas, tipo y alcance. Los colores indican el alcance:
             <span style="color: #1976d2; font-weight: 600;">Azul (General)</span>,
             <span style="color: #2e7d32; font-weight: 600;">Verde (Rama)</span>,
-            <span style="color: #ef6c00; font-weight: 600;">Naranja (Individual)</span>
+            <span style="color: #8e44ad; font-weight: 600;">Violeta (Educadores)</span>
         </div>
 
         <div class="filtros-container">
             <div class="filtro-grupo">
-                <label for="selectRama"><i class="fas fa-sitemap"></i> Filtrar por Rama</label>
-                <select id="selectRama">
-                    <option value="">📍 Todas las ramas</option>
+                <label for="selectRamas"><i class="fas fa-sitemap"></i> Filtrar por Ramas</label>
+                <select id="selectRamas" multiple>
                 </select>
+                <small style="color: #666;">Tip: mantén presionado Ctrl (o Cmd) para seleccionar múltiples ramas.</small>
             </div>
 
             <div class="filtro-grupo">
                 <div class="tipos-label"><i class="fas fa-list"></i> Filtrar por Tipo de Evento</div>
                 <div class="filtro-tipos">
                     <div class="checkbox-item tipo-ACTIVIDAD">
-                        <input type="checkbox" id="chkActividad" value="ACTIVIDAD" checked>
+                        <input type="checkbox" id="chkActividad" name="tipoEvento" value="ACTIVIDAD" checked>
                         <label for="chkActividad">Actividad</label>
                         <span class="tipo-badge"></span>
                     </div>
                     <div class="checkbox-item tipo-CURSO">
-                        <input type="checkbox" id="chkCurso" value="CURSO" checked>
+                        <input type="checkbox" id="chkCurso" name="tipoEvento" value="CURSO" checked>
                         <label for="chkCurso">Curso</label>
                         <span class="tipo-badge"></span>
                     </div>
                     <div class="checkbox-item tipo-BINGO">
-                        <input type="checkbox" id="chkBingo" value="BINGO" checked>
+                        <input type="checkbox" id="chkBingo" name="tipoEvento" value="BINGO" checked>
                         <label for="chkBingo">Bingo</label>
                         <span class="tipo-badge"></span>
                     </div>
                     <div class="checkbox-item tipo-CAMPAMENTO">
-                        <input type="checkbox" id="chkCampamento" value="CAMPAMENTO" checked>
+                        <input type="checkbox" id="chkCampamento" name="tipoEvento" value="CAMPAMENTO" checked>
                         <label for="chkCampamento">Campamento</label>
+                        <span class="tipo-badge"></span>
+                    </div>
+                    <div class="checkbox-item tipo-CONSEJO">
+                        <input type="checkbox" id="chkConsejo" name="tipoEvento" value="CONSEJO" checked>
+                        <label for="chkConsejo">Consejo</label>
+                        <span class="tipo-badge"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filtro-grupo">
+                <div class="tipos-label"><i class="fas fa-layer-group"></i> Filtrar por Alcance</div>
+                <div class="filtro-tipos">
+                    <div class="checkbox-item alcance-GENERAL">
+                        <input type="checkbox" id="chkGeneral" name="alcanceEvento" value="GENERAL" checked>
+                        <label for="chkGeneral">General</label>
+                        <span class="tipo-badge"></span>
+                    </div>
+                    <div class="checkbox-item alcance-RAMA">
+                        <input type="checkbox" id="chkRama" name="alcanceEvento" value="RAMA" checked>
+                        <label for="chkRama">Rama</label>
+                        <span class="tipo-badge"></span>
+                    </div>
+                    <div class="checkbox-item alcance-EDUCADORES">
+                        <input type="checkbox" id="chkEducadores" name="alcanceEvento" value="EDUCADORES" checked>
+                        <label for="chkEducadores">Educadores</label>
                         <span class="tipo-badge"></span>
                     </div>
                 </div>
@@ -376,8 +426,8 @@
                     <span>Rama</span>
                 </div>
                 <div class="legend-item">
-                    <span class="legend-color color-individual"></span>
-                    <span>Individual</span>
+                    <span class="legend-color color-educadores"></span>
+                    <span>Educadores</span>
                 </div>
             </div>
         </div>

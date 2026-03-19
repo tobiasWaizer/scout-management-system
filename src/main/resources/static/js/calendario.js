@@ -13,7 +13,8 @@ function getIconByTipo(tipo) {
         ACTIVIDAD: "fa-star",
         CURSO: "fa-book",
         BINGO: "fa-dice",
-        CAMPAMENTO: "fa-tent"
+        CAMPAMENTO: "fa-tent",
+        CONSEJO: "fa-users"
     };
     return iconos[tipo] || "fa-calendar";
 }
@@ -23,7 +24,8 @@ function getColorByTipo(tipo) {
         ACTIVIDAD: "#3498db",
         CURSO: "#2ecc71",
         BINGO: "#f39c12",
-        CAMPAMENTO: "#e74c3c"
+        CAMPAMENTO: "#e74c3c",
+        CONSEJO: "#8e44ad"
     };
     return colores[tipo] || "#546e7a";
 }
@@ -32,7 +34,7 @@ function mapBackendEvent(evento) {
     const colorByAlcance = {
         GENERAL: "#1976d2",
         RAMA: "#2e7d32",
-        INDIVIDUAL: "#ef6c00"
+        EDUCADORES: "#8e44ad"
     };
 
     const tipo = evento.tipoEvento || "ACTIVIDAD";
@@ -80,14 +82,15 @@ async function cargarRamas() {
         const ramas = Array.isArray(data.ramas) ? data.ramas : (Array.isArray(data) ? data : []);
         console.log("✅ Ramas cargadas:", ramas);
         
-        const selectRama = document.getElementById('selectRama');
+        const selectRamas = document.getElementById('selectRamas');
+        selectRamas.innerHTML = "";
         ramas.forEach(rama => {
             const option = document.createElement('option');
             option.value = rama.id;
             option.textContent = rama.nombre;
-            selectRama.appendChild(option);
+            selectRamas.appendChild(option);
         });
-        console.log(`✅ ${ramas.length} ramas agregadas al dropdown`);
+        console.log(`✅ ${ramas.length} ramas agregadas al selector de ramas`);
     } catch (error) {
         console.error("❌ Error al cargar ramas:", error);
     }
@@ -95,10 +98,29 @@ async function cargarRamas() {
 
 function obtenerFiltrosActivos() {
     const tiposSeleccionados = [];
-    document.querySelectorAll('.checkbox-item input[type="checkbox"]:checked').forEach(checkbox => {
+    document.querySelectorAll('input[name="tipoEvento"]:checked').forEach(checkbox => {
         tiposSeleccionados.push(checkbox.value);
     });
     return tiposSeleccionados;
+}
+
+function obtenerAlcancesActivos() {
+    const alcancesSeleccionados = [];
+    document.querySelectorAll('input[name="alcanceEvento"]:checked').forEach(checkbox => {
+        alcancesSeleccionados.push(checkbox.value);
+    });
+    return alcancesSeleccionados;
+}
+
+function obtenerRamaIdsSeleccionadas() {
+    const selectRamas = document.getElementById('selectRamas');
+    if (!selectRamas) {
+        return [];
+    }
+
+    return Array.from(selectRamas.selectedOptions)
+        .map(option => option.value)
+        .filter(value => value !== "");
 }
 
 function mostrarDetalleEvento(evento) {
@@ -107,7 +129,7 @@ function mostrarDetalleEvento(evento) {
     const mapAlcance = {
         GENERAL: "General",
         RAMA: "Rama",
-        INDIVIDUAL: "Individual"
+        EDUCADORES: "Educadores"
     };
 
     const detalles = `
@@ -138,7 +160,7 @@ function mostrarDetalleEvento(evento) {
                     <span style="display: inline-block; padding: 4px 8px; background-color: ${
                         alcanceEvento === 'GENERAL' ? '#1976d2' : 
                         alcanceEvento === 'RAMA' ? '#2e7d32' : 
-                        '#ef6c00'
+                        '#8e44ad'
                     }; color: white; border-radius: 4px; font-size: 12px;">
                         ${mapAlcance[alcanceEvento] || alcanceEvento}
                     </span>
@@ -222,13 +244,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const personaIdDesdeQuery = new URLSearchParams(window.location.search).get("personaId");
     const ramaIdDesdeQuery = new URLSearchParams(window.location.search).get("ramaId");
     
-    // Cargar ramas
-    cargarRamas();
-    
-    // Establecer rama desde query string si existe
-    if (ramaIdDesdeQuery) {
-        document.getElementById('selectRama').value = ramaIdDesdeQuery;
-    }
+    cargarRamas().then(() => {
+        if (ramaIdDesdeQuery) {
+            const selectRamas = document.getElementById('selectRamas');
+            const option = Array.from(selectRamas.options).find(opt => opt.value === ramaIdDesdeQuery);
+            if (option) {
+                option.selected = true;
+            }
+        }
+    });
 
     const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: "dayGridMonth",
@@ -243,24 +267,30 @@ document.addEventListener("DOMContentLoaded", function () {
             try {
                 const desde = toLocalDateTimeString(fetchInfo.start);
                 const hasta = toLocalDateTimeString(fetchInfo.end);
-                let url = `/api/eventos/rango?desde=${encodeURIComponent(desde)}&hasta=${encodeURIComponent(hasta)}`;
+                let url = `/api/eventos?desde=${encodeURIComponent(desde)}&hasta=${encodeURIComponent(hasta)}`;
                 
                 if (personaIdDesdeQuery) {
                     url += `&personaId=${encodeURIComponent(personaIdDesdeQuery)}`;
                 }
-                
-                const ramaIdSeleccionada = document.getElementById('selectRama').value;
-                if (ramaIdSeleccionada) {
-                    url += `&ramaId=${encodeURIComponent(ramaIdSeleccionada)}`;
-                }
-                
+
+                const ramaIdsSeleccionadas = obtenerRamaIdsSeleccionadas();
+                ramaIdsSeleccionadas.forEach(ramaId => {
+                    url += `&ramaIds=${encodeURIComponent(ramaId)}`;
+                });
+
                 const tiposSeleccionados = obtenerFiltrosActivos();
-                if (tiposSeleccionados.length === 1) {
-                    url += `&tipoEvento=${encodeURIComponent(tiposSeleccionados[0])}`;
-                } else if (tiposSeleccionados.length > 1) {
-                    tiposSeleccionados.forEach(tipo => {
-                        url += `&tipoEvento=${encodeURIComponent(tipo)}`;
-                    });
+                tiposSeleccionados.forEach(tipo => {
+                    url += `&tipoEvento=${encodeURIComponent(tipo)}`;
+                });
+
+                const alcancesSeleccionados = obtenerAlcancesActivos();
+                alcancesSeleccionados.forEach(alcance => {
+                    url += `&alcanceEvento=${encodeURIComponent(alcance)}`;
+                });
+
+                if (tiposSeleccionados.length === 0 || alcancesSeleccionados.length === 0) {
+                    successCallback([]);
+                    return;
                 }
 
                 console.log("🔍 Cargando eventos desde:", url);
@@ -286,12 +316,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     calendar.render();
     
-    // Listeners para filtros
-    document.getElementById('selectRama').addEventListener('change', function() {
+    document.getElementById('selectRamas').addEventListener('change', function() {
         calendar.refetchEvents();
     });
     
-    document.querySelectorAll('.checkbox-item input[type="checkbox"]').forEach(checkbox => {
+    document.querySelectorAll('input[name="tipoEvento"], input[name="alcanceEvento"]').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             calendar.refetchEvents();
         });
