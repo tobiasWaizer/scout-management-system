@@ -3,18 +3,22 @@ package com.scout.scoutmanagement.domain;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
 @Entity
 @Table(name = "eventos_bingo")
+@Getter
+@Setter
 public class EventoBingo extends Evento {
     @ManyToMany
-    List<Persona> cocineros;
+    private List<Persona> cocineros;
     @ManyToMany
-    List<Persona> cartoneros;
+    private List<Persona> cartoneros;
     @ManyToMany
-    List<Persona> bacha;
+    private List<Persona> bacha;
 
     public EventoBingo() {
         setAlcanceEvento(AlcanceEvento.GENERAL);

@@ -1,48 +1,51 @@
 package com.scout.scoutmanagement.backend.service;
 
 import com.scout.scoutmanagement.backend.dto.PersonaDTO;
+import com.scout.scoutmanagement.backend.exception.ObjectNotFoundException;
+import com.scout.scoutmanagement.backend.repository.EstadoCursoRepository;
+import com.scout.scoutmanagement.backend.repository.PersonaRepository;
 import com.scout.scoutmanagement.domain.Pagos.CostosFijos;
 import com.scout.scoutmanagement.domain.Pagos.Cuota;
 import com.scout.scoutmanagement.domain.Pagos.Motivo;
+import com.scout.scoutmanagement.domain.EstadoCurso;
 import com.scout.scoutmanagement.domain.Persona;
 import com.scout.scoutmanagement.domain.Rama;
 import com.scout.scoutmanagement.domain.Rol;
-import com.scout.scoutmanagement.backend.exception.ObjectNotFoundException;
-import com.scout.scoutmanagement.backend.repository.PersonaRepository;
-import com.scout.scoutmanagement.backend.service.CostosFijosAutomaticosService;
-import com.scout.scoutmanagement.backend.service.CuotaService;
-import com.scout.scoutmanagement.backend.service.PersonaService;
-import com.scout.scoutmanagement.backend.service.RamaService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class PersonaServiceTest {
+class PersonasServiceTest {
 
     @Mock
     private PersonaRepository personaRepository;
 
     @Mock
-    private RamaService ramaService;
+    private EstadoCursoRepository estadoCursoRepository;
 
     @Mock
-    private CuotaService cuotaService;
+    private RamasService ramasService;
+
+    @Mock
+    private CuotasService cuotasService;
 
     @Mock
     private CostosFijosAutomaticosService costosFijosAutomaticosService;
 
     @InjectMocks
-    private PersonaService personaService;
+    private PersonasService personasService;
 
     @Test
     void crearPersona_deberiaGuardarPersonaCuandoDatosSonValidos() {
@@ -62,14 +65,16 @@ class PersonaServiceTest {
 
         when(personaRepository.findByDni(dto.getDni())).thenReturn(Optional.empty());
         when(personaRepository.findByMail(dto.getMail())).thenReturn(Optional.empty());
-        when(ramaService.obtenerRamaPorId(dto.getRamaId())).thenReturn(rama);
+        when(ramasService.obtenerRamaPorId(dto.getRamaId())).thenReturn(rama);
         when(personaRepository.save(any(Persona.class))).thenReturn(guardada);
+        when(estadoCursoRepository.save(any(EstadoCurso.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Persona resultado = personaService.crearPersona(dto);
+        Persona resultado = personasService.crearPersona(dto);
 
         assertEquals(10L, resultado.getId());
         assertEquals(Rol.BENEFICIARIO, resultado.getRol());
         assertEquals(1L, resultado.getRama().getId());
+        verify(estadoCursoRepository).save(any(EstadoCurso.class));
     }
 
     @Test
@@ -82,10 +87,13 @@ class PersonaServiceTest {
         ramaDestino.setId(2L);
 
         when(personaRepository.findByIdAndRol(7L, Rol.BENEFICIARIO)).thenReturn(Optional.of(persona));
-        when(ramaService.obtenerRamaPorId(2L)).thenReturn(ramaDestino);
-        when(personaRepository.save(any(Persona.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(ramasService.obtenerRamaPorId(2L)).thenReturn(ramaDestino);
+        when(estadoCursoRepository.findByPersonaIdAndActualTrue(7L)).thenReturn(Optional.empty());
+        when(estadoCursoRepository.findByPersonaIdAndRamaId(7L, 2L)).thenReturn(Optional.empty());
+        when(estadoCursoRepository.save(any(EstadoCurso.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(personaRepository.save(any(Persona.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Persona resultado = personaService.realizarPartida(7L, 2L);
+        Persona resultado = personasService.realizarPartida(7L, 2L);
 
         assertEquals(Rol.EDUCADOR, resultado.getRol());
         assertEquals(2L, resultado.getRama().getId());
@@ -95,7 +103,7 @@ class PersonaServiceTest {
     void realizarPartida_deberiaLanzarNotFoundSiNoEsBeneficiario() {
         when(personaRepository.findByIdAndRol(7L, Rol.BENEFICIARIO)).thenReturn(Optional.empty());
 
-        ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> personaService.realizarPartida(7L, 2L));
+        ObjectNotFoundException ex = assertThrows(ObjectNotFoundException.class, () -> personasService.realizarPartida(7L, 2L));
 
         assertEquals("No existe un beneficiario con ID: 7", ex.getMessage());
     }
@@ -112,10 +120,10 @@ class PersonaServiceTest {
         cuotaPendiente.getCosto().setMotivo(Motivo.CUOTA_MENSUAL);
 
         when(personaRepository.findById(2L)).thenReturn(Optional.of(persona));
-        when(cuotaService.obtenerCuotasDePersonaOrdenadasPorCosto(2L, true, 2026))
+        when(cuotasService.obtenerCuotasDePersonaOrdenadasPorCosto(2L, true, 2026))
             .thenReturn(java.util.List.of(cuotaPendiente));
 
-        java.util.List<Cuota> resultado = personaService.obtenerCuotasDePersona(2L, true, false, 2026);
+        List<Cuota> resultado = personasService.obtenerCuotasDePersona(2L, true, false, 2026);
 
         assertEquals(1, resultado.size());
     }
@@ -128,7 +136,7 @@ class PersonaServiceTest {
 
         when(personaRepository.findById(2L)).thenReturn(Optional.of(persona));
 
-        java.util.List<Cuota> resultado = personaService.obtenerCuotasDePersona(2L, false, true);
+        List<Cuota> resultado = personasService.obtenerCuotasDePersona(2L, false, true);
 
         assertEquals(0, resultado.size());
     }
@@ -148,10 +156,10 @@ class PersonaServiceTest {
         cuota2025.setCosto(costo2025);
 
         when(personaRepository.findById(2L)).thenReturn(Optional.of(persona));
-        when(cuotaService.obtenerCuotasDePersonaOrdenadasPorCosto(2L, false, 2025))
+        when(cuotasService.obtenerCuotasDePersonaOrdenadasPorCosto(2L, false, 2025))
             .thenReturn(java.util.List.of(cuota2025));
 
-        java.util.List<Cuota> resultado = personaService.obtenerCuotasDePersona(2L, false, false, 2025);
+        List<Cuota> resultado = personasService.obtenerCuotasDePersona(2L, false, false, 2025);
 
         assertEquals(1, resultado.size());
         assertEquals(2025, ((CostosFijos) resultado.get(0).getCosto()).getAnio());

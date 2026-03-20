@@ -2,10 +2,12 @@ package com.scout.scoutmanagement.backend.service;
 
 import com.scout.scoutmanagement.backend.dto.PersonaDTO;
 import com.scout.scoutmanagement.domain.Pagos.Cuota;
+import com.scout.scoutmanagement.domain.EstadoCurso;
 import com.scout.scoutmanagement.domain.Persona;
 import com.scout.scoutmanagement.domain.Rama;
 import com.scout.scoutmanagement.domain.Rol;
 import com.scout.scoutmanagement.backend.exception.ObjectNotFoundException;
+import com.scout.scoutmanagement.backend.repository.EstadoCursoRepository;
 import com.scout.scoutmanagement.backend.repository.PersonaRepository;
 import org.springframework.stereotype.Service;
 
@@ -17,27 +19,30 @@ import java.util.List;
 import java.util.Set;
 
 @Service
-public class PersonaService {
+public class PersonasService {
 
     private final PersonaRepository personaRepository;
-    private final RamaService ramaService;
-    private final CuotaService cuotaService;
+    private final EstadoCursoRepository estadoCursoRepository;
+    private final RamasService ramasService;
+    private final CuotasService cuotasService;
     private final CostosFijosAutomaticosService costosFijosAutomaticosService;
 
-    public PersonaService(
+    public PersonasService(
         PersonaRepository personaRepository,
-        RamaService ramaService,
-        CuotaService cuotaService,
+        EstadoCursoRepository estadoCursoRepository,
+        RamasService ramasService,
+        CuotasService cuotasService,
         CostosFijosAutomaticosService costosFijosAutomaticosService) {
         this.personaRepository = personaRepository;
-        this.ramaService = ramaService;
-        this.cuotaService = cuotaService;
+        this.estadoCursoRepository = estadoCursoRepository;
+        this.ramasService = ramasService;
+        this.cuotasService = cuotasService;
         this.costosFijosAutomaticosService = costosFijosAutomaticosService;
     }
 
     public Persona crearPersona(PersonaDTO personaDTO) {
         validarDniYMailUnicos(personaDTO.getDni(), personaDTO.getMail());
-        Rama rama = ramaService.obtenerRamaPorId(personaDTO.getRamaId());
+        Rama rama = ramasService.obtenerRamaPorId(personaDTO.getRamaId());
 
         Persona persona = new Persona(
             personaDTO.getNombre(),
@@ -50,6 +55,7 @@ public class PersonaService {
 
         //potencial observer, si se quiere desacoplar la logica de costos fijos automaticos del servicio de personas, se podria implementar un evento de "PersonaCreada" y que el servicio de costos fijos automaticos escuche ese evento para generar los costos fijos correspondientes
         Persona personaGuardada = personaRepository.save(persona);
+        estadoCursoRepository.save(EstadoCurso.inicial(personaGuardada, rama));
         YearMonth periodoActual = YearMonth.now();
         costosFijosAutomaticosService.generarDesdeMesHastaFinDeAnioParaPersona(
             personaGuardada,
@@ -62,15 +68,20 @@ public class PersonaService {
 
     public Persona modificarPersona(PersonaDTO personaDTO, Long idPersona) {
         Persona persona = obtenerPersona(idPersona);
-        Rama rama = ramaService.obtenerRamaPorId(personaDTO.getRamaId());
+        Rama rama = ramasService.obtenerRamaPorId(personaDTO.getRamaId());
         validarDniYMailUnicosEnActualizacion(personaDTO.getDni(), personaDTO.getMail(), idPersona);
 
         persona.setNombre(personaDTO.getNombre());
         persona.setApellido(personaDTO.getApellido());
         persona.setDni(personaDTO.getDni());
         persona.setMail(personaDTO.getMail());
+        boolean cambioRama = !persona.getRama().getId().equals(rama.getId());
         persona.setRama(rama);
         persona.setRol(personaDTO.getRol());
+
+        if (cambioRama) {
+            actualizarEstadoCursoVigente(persona, rama);
+        }
 
         return personaRepository.save(persona);
     }
@@ -78,6 +89,10 @@ public class PersonaService {
     public Persona obtenerPersona(Long idPersona) {
         return personaRepository.findById(idPersona)
             .orElseThrow(() -> new ObjectNotFoundException("No existe una persona con ID: " + idPersona));
+    }
+
+    public Persona guardarPersona(Persona persona) {
+        return personaRepository.save(persona);
     }
 
     public Persona inhabilitarPersona(Long idPersona) {
@@ -118,9 +133,21 @@ public class PersonaService {
                 .orElseThrow(() -> new ObjectNotFoundException("No existe un beneficiario con ID: " + idBeneficiario));
 
         persona.hacerPartida();
-        Rama ramaDestino = ramaService.obtenerRamaPorId(rama_id);
+        Rama ramaDestino = ramasService.obtenerRamaPorId(rama_id);
         persona.setRama(ramaDestino);
+        actualizarEstadoCursoVigente(persona, ramaDestino);
         return personaRepository.save(persona);
+    }
+
+    public EstadoCurso obtenerEstadoCursoActualSegunPersona(Persona persona) {
+        return estadoCursoRepository.obtenerEstadoCursoActualPorPersonaId(persona.getId())
+            .orElseThrow(() -> new ObjectNotFoundException(
+                "No existe estado de curso actual para la persona con ID: " + persona.getId()
+            ));
+    }
+
+    public EstadoCurso guardarEstadoCurso(EstadoCurso estadoCurso) {
+        return estadoCursoRepository.save(estadoCurso);
     }
 
     public Rama establecerJefeDeRama(Long idEducador) {
@@ -130,16 +157,16 @@ public class PersonaService {
         if (jefe.getRama() == null) {
             throw new IllegalArgumentException("El educador con ID " + idEducador + " no tiene rama asignada");
         }
-        Rama ramaDelEducador = ramaService.obtenerRamaPorId(jefe.getRama().getId());
+        Rama ramaDelEducador = ramasService.obtenerRamaPorId(jefe.getRama().getId());
 
-        ramaService.obtenerRamaDondeEsJefe(idEducador)
+        ramasService.obtenerRamaDondeEsJefe(idEducador)
             .filter(rama -> !rama.getId().equals(ramaDelEducador.getId()))
             .ifPresent(rama -> {
                 throw new IllegalArgumentException("La persona ya es jefe de la rama " + rama.getNombre());
             });
 
         ramaDelEducador.setJefeDeRama(jefe);
-        return ramaService.guardar(ramaDelEducador);
+        return ramasService.guardar(ramaDelEducador);
     }
 
     public List<Cuota> obtenerCuotasDePersona(Long idPersona, boolean pendiente, boolean activo) {
@@ -153,10 +180,22 @@ public class PersonaService {
             return List.of();
         }
 
-        return cuotaService.obtenerCuotasDePersonaOrdenadasPorCosto(idPersona, pendiente, anio);
+        return cuotasService.obtenerCuotasDePersonaOrdenadasPorCosto(idPersona, pendiente, anio);
     }
 
+    private void actualizarEstadoCursoVigente(Persona persona, Rama nuevaRama) {
+        estadoCursoRepository.findByPersonaIdAndActualTrue(persona.getId())
+            .ifPresent(estado -> {
+                estado.setActual(false);
+                estadoCursoRepository.save(estado);
+            });
 
+        EstadoCurso estadoNuevoOViejo = estadoCursoRepository.findByPersonaIdAndRamaId(persona.getId(), nuevaRama.getId())
+            .orElseGet(() -> EstadoCurso.inicial(persona, nuevaRama));
+        estadoNuevoOViejo.setActual(true);
+        estadoCursoRepository.save(estadoNuevoOViejo);
+    }
+    
     private void validarDniYMailUnicos(Long dni, String mail) {
         if (personaRepository.findByDni(dni).isPresent()) {
             throw new IllegalArgumentException("Ya existe una persona con el DNI: " + dni);
@@ -180,6 +219,7 @@ public class PersonaService {
                 throw new IllegalArgumentException("Ya existe una persona con el email: " + mail);
             });
     }
+
 
 }
 

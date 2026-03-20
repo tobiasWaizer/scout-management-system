@@ -2,7 +2,7 @@ package com.scout.scoutmanagement.backend.controller.api;
 
 import com.scout.scoutmanagement.domain.Rama;
 import com.scout.scoutmanagement.domain.Persona;
-import com.scout.scoutmanagement.backend.service.RamaService;
+import com.scout.scoutmanagement.backend.service.RamasService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,17 +16,17 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/ramas")
-public class RamaController {
+public class RamasController {
 
-    private final RamaService ramaService;
+    private final RamasService ramasService;
 
-    public RamaController(RamaService ramaService) {
-        this.ramaService = ramaService;
+    public RamasController(RamasService ramasService) {
+        this.ramasService = ramasService;
     }
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> obtenerTodasLasRamas() {
-        List<Rama> ramas = ramaService.obtenerTodasLasRamas();
+        List<Rama> ramas = ramasService.obtenerTodasLasRamas();
         Map<String, Object> respuesta = new HashMap<>();
         respuesta.put("mensaje", "Ramas obtenidas exitosamente");
         respuesta.put("cantidadRamas", ramas.size());

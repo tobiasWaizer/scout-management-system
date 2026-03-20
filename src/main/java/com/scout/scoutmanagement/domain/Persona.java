@@ -4,9 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashSet;
-import java.util.Set;
-
 @Setter
 @Getter
 @Entity
@@ -34,8 +31,6 @@ public class Persona {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rama_id")
     private Rama rama;
-
-
     @Enumerated(EnumType.STRING)
     @Column(name = "rol", nullable = false)
     private Rol rol;
@@ -58,4 +53,3 @@ public class Persona {
     }
 
 }
-

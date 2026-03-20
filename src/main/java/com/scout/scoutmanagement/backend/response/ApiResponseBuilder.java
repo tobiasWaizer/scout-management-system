@@ -59,8 +59,11 @@ public class ApiResponseBuilder {
             respuesta.put("lugar", campamento.getLugar());
             respuesta.put("contactoLugar", campamento.getContactoLugar());
         }
-        if (evento instanceof EventoBingo) {
+        if (evento instanceof EventoBingo eventoBingo) {
             respuesta.put("detalle", "Evento bingo creado");
+            respuesta.put("cocinerosIds", eventoBingo.getCocineros().stream().map(Persona::getId).toList());
+            respuesta.put("cartonerosIds", eventoBingo.getCartoneros().stream().map(Persona::getId).toList());
+            respuesta.put("bachaIds", eventoBingo.getBacha().stream().map(Persona::getId).toList());
         }
         return respuesta;
     }
@@ -180,11 +183,8 @@ public class ApiResponseBuilder {
         Map<String, Object> evento = new LinkedHashMap<>();
         evento.put("id", eventoEntidad.getId());
         evento.put("titulo", eventoEntidad.getTitulo());
-        evento.put("title", eventoEntidad.getTitulo());
         evento.put("fechaInicio", eventoEntidad.getFechaInicio());
-        evento.put("start", eventoEntidad.getFechaInicio());
         evento.put("fechaFin", eventoEntidad.getFechaFin());
-        evento.put("end", eventoEntidad.getFechaFin());
         evento.put("alcanceEvento", eventoEntidad.getAlcanceEvento());
         evento.put("ramaId", eventoEntidad.getRama() != null ? eventoEntidad.getRama().getId() : null);
         evento.put("tipoEvento", tipoEvento(eventoEntidad));

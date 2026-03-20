@@ -41,6 +41,13 @@ public class EventoCurso extends Evento {
     public TipoEvento getTipo() {
         return TipoEvento.CURSO;
     }
+
+    public void agregarSuscripto(Persona persona) {
+        if (suscriptos.contains(persona)) {
+            throw new RuntimeException("Suscripto ya existente");
+        }
+        else suscriptos.add(persona);
+    }
 }
 
 

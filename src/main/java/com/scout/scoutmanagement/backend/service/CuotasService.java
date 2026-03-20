@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class CuotaService {
+public class CuotasService {
 
     private final CuotaRepository cuotaRepository;
 
-    public CuotaService(CuotaRepository cuotaRepository) {
+    public CuotasService(CuotaRepository cuotaRepository) {
         this.cuotaRepository = cuotaRepository;
     }
 

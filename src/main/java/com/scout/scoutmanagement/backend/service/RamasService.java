@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class RamaService {
+public class RamasService {
 
     private final RamaRepository ramaRepository;
 
-    public RamaService(RamaRepository ramaRepository) {
+    public RamasService(RamaRepository ramaRepository) {
         this.ramaRepository = ramaRepository;
     }
 

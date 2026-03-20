@@ -10,7 +10,7 @@ import com.scout.scoutmanagement.domain.Persona;
 import com.scout.scoutmanagement.backend.repository.PagoRepository;
 import com.scout.scoutmanagement.backend.service.CostosService;
 import com.scout.scoutmanagement.backend.service.PagosService;
-import com.scout.scoutmanagement.backend.service.PersonaService;
+import com.scout.scoutmanagement.backend.service.PersonasService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,7 +38,7 @@ class PagosServiceTest {
     private CostosService costosService;
 
     @Mock
-    private PersonaService personaService;
+    private PersonasService personasService;
 
     @InjectMocks
     private PagosService pagosService;
@@ -66,8 +66,8 @@ class PagosServiceTest {
         Cuota cuota2 = costo2.getCuotas().get(0);
         cuota2.setId(1001L);
 
-        when(personaService.obtenerPersona(1L)).thenReturn(personaQuePaga);
-        when(personaService.obtenerPersona(2L)).thenReturn(personaQueRegistra);
+        when(personasService.obtenerPersona(1L)).thenReturn(personaQuePaga);
+        when(personasService.obtenerPersona(2L)).thenReturn(personaQueRegistra);
         when(costosService.obtenerCuotasPorIds(dto.getCuotaIds())).thenReturn(List.of(cuota1, cuota2));
         when(pagoRepository.save(any(Pago.class))).thenAnswer(invocation -> {
             Pago pago = invocation.getArgument(0);
@@ -109,8 +109,8 @@ class PagosServiceTest {
         cuotaYaPagada.setId(1000L);
         cuotaYaPagada.setPago(new Pago());
 
-        when(personaService.obtenerPersona(1L)).thenReturn(personaQuePaga);
-        when(personaService.obtenerPersona(2L)).thenReturn(personaQueRegistra);
+        when(personasService.obtenerPersona(1L)).thenReturn(personaQuePaga);
+        when(personasService.obtenerPersona(2L)).thenReturn(personaQueRegistra);
         when(costosService.obtenerCuotasPorIds(dto.getCuotaIds())).thenReturn(List.of(cuotaYaPagada));
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> pagosService.generarPago(dto));
@@ -138,13 +138,13 @@ class PagosServiceTest {
         persona.setId(idPersona);
 
         Pago pago = new Pago();
-        when(personaService.obtenerPersona(idPersona)).thenReturn(persona);
+        when(personasService.obtenerPersona(idPersona)).thenReturn(persona);
         when(pagoRepository.obtenerPagosDePersonaDesdeAnioOrdenadasPorFecha(idPersona, anio)).thenReturn(List.of(pago));
 
         List<Pago> resultado = pagosService.obtenerPagosDePersonaId(idPersona, anio);
 
         assertEquals(1, resultado.size());
-        verify(personaService).obtenerPersona(eq(idPersona));
+        verify(personasService).obtenerPersona(eq(idPersona));
         verify(pagoRepository).obtenerPagosDePersonaDesdeAnioOrdenadasPorFecha(eq(idPersona), eq(anio));
     }
 

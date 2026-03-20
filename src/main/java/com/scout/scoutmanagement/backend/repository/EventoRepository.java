@@ -2,6 +2,9 @@ package com.scout.scoutmanagement.backend.repository;
 
 import com.scout.scoutmanagement.domain.AlcanceEvento;
 import com.scout.scoutmanagement.domain.Evento;
+import com.scout.scoutmanagement.domain.EventoCurso;
+import com.scout.scoutmanagement.domain.NivelCurso;
+import com.scout.scoutmanagement.backend.exception.ObjectNotFoundException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -56,6 +59,22 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
         @Param("educadores") AlcanceEvento educadores,
         @Param("esEducador") boolean esEducador
     );
+
+    @Query(
+        "SELECT c.id FROM EventoCurso c " +
+        "WHERE c.rama.id = :ramaId AND c.nivel = :nivel"
+    )
+    List<Long> obtenerIdsCursosPorRamaYNivel(
+        @Param("ramaId") Long ramaId,
+        @Param("nivel") NivelCurso nivel
+    );
+
+    default EventoCurso getCursoById(Long idCurso) {
+        return findById(idCurso)
+            .filter(evento -> evento instanceof EventoCurso)
+            .map(evento -> (EventoCurso) evento)
+            .orElseThrow(() -> new ObjectNotFoundException("No existe un curso con ID: " + idCurso));
+    }
 }
 
 

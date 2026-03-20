@@ -24,19 +24,19 @@ public class CostosService {
 
     private final CostosVariablesRepository costosVariablesRepository;
     private final CostosRepository costosRepository;
-    private final CuotaService cuotaService;
-    private final PersonaService personaService;
+    private final CuotasService cuotasService;
+    private final PersonasService personasService;
 
     public CostosService(
         CostosVariablesRepository costosVariablesRepository,
         CostosRepository costosRepository,
-        CuotaService cuotaService,
-        PersonaService personaService
+        CuotasService cuotasService,
+        PersonasService personasService
     ) {
         this.costosVariablesRepository = costosVariablesRepository;
         this.costosRepository = costosRepository;
-        this.cuotaService = cuotaService;
-        this.personaService = personaService;
+        this.cuotasService = cuotasService;
+        this.personasService = personasService;
     }
 
     @Transactional(readOnly = true)
@@ -46,7 +46,7 @@ public class CostosService {
 
     @Transactional(readOnly = true)
     public List<Cuota> obtenerCuotasPorIds(List<Long> cuotaIds) {
-        return cuotaService.obtenerCuotasPorIds(cuotaIds);
+        return cuotasService.obtenerCuotasPorIds(cuotaIds);
     }
 
     @Transactional
@@ -72,7 +72,7 @@ public class CostosService {
         }
 
         cuotas.forEach(cuota -> cuota.setPago(pago));
-        cuotaService.guardarTodas(cuotas);
+        cuotasService.guardarTodas(cuotas);
     }
 
     private void asociarPago(Costos costo, Pago pago) {
@@ -81,9 +81,9 @@ public class CostosService {
 
     @Transactional //solo creamos costos variables ya que los fijos se autogeneran automaticamente
     public CostosVariables crearCosto(CostoDTO costoDTO) {
-        Persona creadora = personaService.obtenerPersona(costoDTO.getId_creador());
+        Persona creadora = personasService.obtenerPersona(costoDTO.getId_creador());
 
-        List<Persona> personasActivas = personaService.obtenerPersonasActivas();
+        List<Persona> personasActivas = personasService.obtenerPersonasActivas();
         if (personasActivas.isEmpty()) {
             throw new IllegalArgumentException("No hay personas activas para asignar el costo");
         }

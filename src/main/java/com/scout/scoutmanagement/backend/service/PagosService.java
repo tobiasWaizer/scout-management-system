@@ -20,24 +20,24 @@ public class PagosService {
 
     private final PagoRepository pagoRepository;
     private final CostosService costosService;
-    private final PersonaService personaService;
+    private final PersonasService personasService;
 
     public PagosService(
         PagoRepository pagoRepository,
         CostosService costosService,
-        PersonaService personaService
+        PersonasService personasService
     ) {
         this.pagoRepository = pagoRepository;
         this.costosService = costosService;
-        this.personaService = personaService;
+        this.personasService = personasService;
     }
 
     @Transactional
     public Pago generarPago(PagoDTO pagoDTO) {
         validarIdsDeCuotasSinRepetidos(pagoDTO.getCuotaIds());
 
-        Persona personaQuePaga = personaService.obtenerPersona(pagoDTO.getPersonaId());
-        Persona personaQueRegistra = personaService.obtenerPersona(pagoDTO.getPersonaQueRegistraId());
+        Persona personaQuePaga = personasService.obtenerPersona(pagoDTO.getPersonaId());
+        Persona personaQueRegistra = personasService.obtenerPersona(pagoDTO.getPersonaQueRegistraId());
         //validarPersonasActivas(personaQuePaga, personaQueRegistra); quizas en un futuro lo activo pero no de momento
 
         List<Cuota> cuotas = costosService.obtenerCuotasPorIds(pagoDTO.getCuotaIds());
@@ -104,7 +104,7 @@ public class PagosService {
     }
 
     public List<Pago> obtenerPagosDePersonaId(Long idPersona, Integer anio) {
-        personaService.obtenerPersona(idPersona);
+        personasService.obtenerPersona(idPersona);
         return pagoRepository.obtenerPagosDePersonaDesdeAnioOrdenadasPorFecha(idPersona, anio);
     }
 }

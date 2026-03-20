@@ -197,7 +197,7 @@
         }
 
         .tipo-CONSEJO .tipo-badge {
-            background-color: #8e44ad;
+            background-color: #d000ff;
         }
 
         .alcance-GENERAL .tipo-badge {
@@ -333,6 +333,44 @@
         .color-educadores {
             background-color: #8e44ad;
         }
+
+        .papelera-eventos {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            border: 2px dashed #b0b8c4;
+            background: rgba(255, 255, 255, 0.92);
+            color: #8a94a6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 9998;
+            opacity: 0.65;
+            transition: all 0.2s ease;
+            pointer-events: none;
+        }
+
+        .papelera-eventos.activa {
+            border-color: #d32f2f;
+            color: #d32f2f;
+            transform: scale(1.04);
+            box-shadow: 0 8px 24px rgba(211, 47, 47, 0.25);
+            opacity: 1;
+        }
+
+        .papelera-eventos.sobre {
+            background: #d32f2f;
+            color: #fff;
+            border-color: #d32f2f;
+            transform: scale(1.08);
+        }
     </style>
 </head>
 <body>
@@ -432,6 +470,12 @@
             </div>
         </div>
     </div>
+</div>
+
+<div id="papeleraEventos" class="papelera-eventos">
+    <i class="fas fa-trash-alt" style="font-size: 24px;"></i>
+    <span>Arrastra aqui</span>
+    <span>para eliminar</span>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
